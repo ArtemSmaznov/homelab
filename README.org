@@ -1128,7 +1128,7 @@ wake word detection
       - proxy-tier
 #+end_src
 * AI :ai:
-** Ollama
+** Ollama :llm:
 #+begin_src yaml
   ollama:
     <<: *service_default
