@@ -573,7 +573,10 @@ wake word detection
 *** App
 #+begin_src yaml
   nextcloud-app:
-    build: ./nextcloud/app
+    build:
+      context: ./nextcloud/app
+      args:
+        NEXTCLOUD_VERSION: ${NEXTCLOUD_VERSION}
     container_name: nextcloud-app
     tty: true # enable colorized logs
     restart: unless-stopped
@@ -605,10 +608,7 @@ wake word detection
 *** Server
 #+begin_src yaml
   nextcloud-server:
-    build:
-      context: ./nextcloud/server
-      args:
-        NEXTCLOUD_VERSION: ${NEXTCLOUD_VERSION}
+    build: ./nextcloud/server
     container_name: nextcloud-server
     hostname: nextcloud
     tty: true # enable colorized logs
