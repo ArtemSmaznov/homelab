@@ -75,10 +75,11 @@ networks:
         - subnet: 172.11.0.0/24
   nextcloud:
   immich:
-  calibre:
+  ai:
   vpn:
-  grafana:
+  calibre:
   webtrees:
+  grafana:
 #+end_src
 #+begin_src yaml
 secrets:
@@ -1139,7 +1140,8 @@ wake word detection
       - ${OLLAMA_LOCAL_PORT}:11434
     volumes:
       - ${CONFIG_DIR}/ollama:/root/.ollama
-      - ${MEDIA_DIR}/ai/models.ollama:/root/.ollama/models
+      - ${AI_MODELS_DIR}/models.ollama:/root/.ollama/models
     networks:
       - hass
+      - ai
 #+end_src
