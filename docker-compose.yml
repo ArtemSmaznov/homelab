@@ -738,8 +738,7 @@ services:
     ports:
       - ${OLLAMA_LOCAL_PORT}:11434
     volumes:
-      - ${CONFIG_DIR}/ollama:/root/.ollama
-      - ${AI_MODELS_DIR}/ollama:/root/.ollama/models
+      - ${AI_DIR}/ollama:/root/.ollama
     networks:
       - hass
       - ai
