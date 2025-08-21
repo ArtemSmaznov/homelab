@@ -1143,6 +1143,13 @@ wake word detection
     volumes:
       - ${AI_DIR}/open-webui:/app/backend/data
     environment:
+      # proxy
+      VIRTUAL_HOST: ${OPEN_WEBUI_HOST}
+      VIRTUAL_PORT: 8080
+      LETSENCRYPT_HOST: ${OPEN_WEBUI_HOST}
+      LETSENCRYPT_EMAIL: ${MY_EMAIL}
+
+      # app
       OLLAMA_BASE_URL: http://ollama:${OLLAMA_LOCAL_PORT}
     networks:
       - ai
