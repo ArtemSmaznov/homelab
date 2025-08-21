@@ -730,6 +730,20 @@ services:
     networks:
       - proxy-tier
 
+  open_webui:
+    <<: *service_default
+    image: ghcr.io/open-webui/open-webui:${OPEN_WEBUI_VERSION}
+    container_name: open_webui
+    hostname: open_webui
+    ports:
+      - ${OPEN_WEBUI_LOCAL_PORT}:8080
+    volumes:
+      - ${AI_DIR}/open-webui:/app/backend/data
+    environment:
+      OLLAMA_BASE_URL: http://ollama:${OLLAMA_LOCAL_PORT}
+    networks:
+      - ai
+
   ollama:
     <<: *service_default
     image: ollama/ollama

@@ -44,6 +44,7 @@
 - [[#misc][Misc]]
   - [[#anki][Anki]]
 - [[#ai][AI]]
+  - [[#open-webui][Open WebUI]]
   - [[#ollama][Ollama]]
 
 * Usage
@@ -1128,7 +1129,24 @@ wake word detection
     networks:
       - proxy-tier
 #+end_src
-* AI :ai:
+* AI :amadeus:ai:
+** Open WebUI :ui:
+#+begin_src yaml
+  open_webui:
+    <<: *service_default
+    image: ghcr.io/open-webui/open-webui:${OPEN_WEBUI_VERSION}
+    container_name: open_webui
+    hostname: open_webui
+    ports:
+      - ${OPEN_WEBUI_LOCAL_PORT}:8080
+    volumes:
+      - ${AI_DIR}/open-webui:/app/backend/data
+    environment:
+      OLLAMA_BASE_URL: http://ollama:${OLLAMA_LOCAL_PORT}
+    networks:
+      - ai
+#+end_src
+
 ** Ollama :llm:
 #+begin_src yaml
   ollama:
