@@ -1152,6 +1152,7 @@ wake word detection
       # app
       OLLAMA_BASE_URL: http://ollama:${OLLAMA_LOCAL_PORT}
     networks:
+      - proxy-tier
       - ai
 #+end_src
 
