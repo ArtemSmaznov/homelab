@@ -46,6 +46,7 @@
 - [[#ai][AI]]
   - [[#open-webui][Open WebUI]]
   - [[#ollama][Ollama]]
+  - [[#speaches][Speaches]]
 
 * Usage
 Bring server up
@@ -1161,5 +1162,37 @@ wake word detection
       - ${AI_MODELS_DIR}/ollama:/root/.ollama/models
     networks:
       - hass
+      - ai
+#+end_src
+
+** Speaches :speech:stt:tts:
+#+begin_src yaml
+  speaches:
+    <<: *service_default
+    build:
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    image: ghcr.io/speaches-ai/speaches:latest-cpu
+    container_name: speaches
+    hostname: speaches
+    develop:
+      watch:
+        - action: rebuild
+          path: ./uv.lock
+        - action: sync+restart
+          path: ./src
+          target: /home/ubuntu/speaches/src
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://0.0.0.0:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    ports:
+      - ${SPEACHES_LOCAL_PORT}:8000
+    volumes:
+      - ${AI_MODELS_DIR}/speaches:/home/ubuntu/.cache/huggingface/hub
+    networks:
       - ai
 #+end_src
