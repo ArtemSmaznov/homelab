@@ -589,7 +589,11 @@ wake word detection
     volumes:
       - /srv/config/nextcloud/app:/var/www/html
       # - /srv/config/nextcloud/opcache-recommended.ini:/usr/local/etc/php/conf.d/opcache-recommended.ini
+      - ${DOWNLOADS_DIR}:/var/www/html/data/artem/files/downloads/amadeus
+      - ${MUSIC_DIR}:/var/www/html/data/artem/files/music
       - ${PICTURES_DIR}:/var/www/html/data/artem/files/pictures
+      - ${PHOTOS_DIR}:/var/www/html/data/artem/files/photos
+      - ${VIDEOS_DIR}:/var/www/html/data/artem/files/videos
       - type: tmpfs
         target: /tmp:exec
     environment:
