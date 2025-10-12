@@ -1125,6 +1125,7 @@ wake word detection
     <<: *service_default
     image: kuklinistvan/anki-sync-server:${ANKI_VERSION}
     container_name: anki
+    hostname: anki
     volumes:
       - ${VOLUMES_DIR}/anki:/app/data
     environment:
