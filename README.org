@@ -47,6 +47,8 @@
   - [[#open-webui][Open WebUI]]
   - [[#ollama][Ollama]]
   - [[#speaches][Speaches]]
+- [[#cicd][CICD]]
+  - [[#jenkins][Jenkins]]
 
 * Usage
 Bring server up
@@ -1134,6 +1136,7 @@ wake word detection
     networks:
       - proxy-tier
 #+end_src
+
 * AI :amadeus:ai:
 ** Open WebUI :ui:
 #+begin_src yaml
@@ -1207,4 +1210,26 @@ wake word detection
       - ${AI_MODELS_DIR}/speaches:/home/ubuntu/.cache/huggingface/hub
     networks:
       - ai
+#+end_src
+* CICD :amadeus:cicd:
+** Jenkins
+#+begin_src yaml
+  jenkins:
+    <<: *service_default
+    image: jenkins/jenkins:${JENKINS_VERSION}-${JENKINS_JAVA_VERSION}
+    container_name: jenkins
+    hostname: jenkins
+    ports:
+      - ${JENKINS_LOCAL_PORT}:8080
+      - 50000:50000
+    volumes:
+      - ${VOLUMES_DIR}/jenkins:/var/jenkins_home
+    # environment:
+    #   # proxy
+    #   VIRTUAL_HOST: ${JENKINS_HOST}
+    #   VIRTUAL_PORT: 8080
+    #   LETSENCRYPT_HOST: ${JENKINS_HOST}
+    #   LETSENCRYPT_EMAIL: ${MY_EMAIL}
+    # networks:
+    #   - proxy-tier
 #+end_src
