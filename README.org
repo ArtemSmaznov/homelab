@@ -124,7 +124,7 @@ services:
     image: linuxserver/heimdall:${HOME_VERSION}
     container_name: home
     volumes:
-      - /srv/config/heimdall:/config
+      - ${VOLUMES_DIR}/heimdall:/config
     environment:
       # proxy
       VIRTUAL_HOST: ${HOME_HOST}
@@ -151,7 +151,7 @@ services:
     ports:
       - ${GRAFANA_LOCAL_PORT}:3000
     volumes:
-      - /srv/config/grafana/app:/var/lib/grafana
+      - ${VOLUMES_DIR}/grafana/app:/var/lib/grafana
     environment:
       # proxy
       VIRTUAL_HOST: ${GRAFANA_HOST}
@@ -227,9 +227,9 @@ services:
       - 80:80
       - 443:443
     volumes:
-      - /srv/config/proxy/certs:/etc/nginx/certs:ro
-      - /srv/config/proxy/vhost.d:/etc/nginx/vhost.d
-      - /srv/config/proxy/html:/usr/share/nginx/html
+      - ${VOLUMES_DIR}/proxy/certs:/etc/nginx/certs:ro
+      - ${VOLUMES_DIR}/proxy/vhost.d:/etc/nginx/vhost.d
+      - ${VOLUMES_DIR}/proxy/html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
     labels:
       com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: 'true'
@@ -249,10 +249,10 @@ Let's encrypt companion
     depends_on:
       - proxy
     volumes:
-      - /srv/config/proxy/certs:/etc/nginx/certs
-      - /srv/config/proxy/acme:/etc/acme.sh
-      - /srv/config/proxy/vhost.d:/etc/nginx/vhost.d
-      - /srv/config/proxy/html:/usr/share/nginx/html
+      - ${VOLUMES_DIR}/proxy/certs:/etc/nginx/certs
+      - ${VOLUMES_DIR}/proxy/acme:/etc/acme.sh
+      - ${VOLUMES_DIR}/proxy/vhost.d:/etc/nginx/vhost.d
+      - ${VOLUMES_DIR}/proxy/html:/usr/share/nginx/html
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       # app
@@ -269,7 +269,7 @@ Let's encrypt companion
     container_name: ddclient
     hostname: ddclient
     volumes:
-      - /srv/config/dns:/config
+      - ${VOLUMES_DIR}/dns:/config
     environment:
       # app
       PUID: ${UID}
@@ -299,7 +299,7 @@ Let's encrypt companion
       #- ${TRANSMISSION_PEER_PORT}:${TRANSMISSION_PEER_PORT}
       #- ${TRANSMISSION_PEER_PORT}:${TRANSMISSION_PEER_PORT}/udp
     volumes:
-      - /srv/config/wireguard:/config
+      - ${VOLUMES_DIR}/wireguard:/config
       - /lib/modules:/lib/modules
     environment:
       # proxy
@@ -332,8 +332,8 @@ Let's encrypt companion
     cap_add:
       - NET_ADMIN
     volumes:
-      - /srv/config/wireguard-ui:/app/db
-      - /srv/config/wireguard:/etc/wireguard
+      - ${VOLUMES_DIR}/wireguard-ui:/app/db
+      - ${VOLUMES_DIR}/wireguard:/etc/wireguard
     environment:
       # app
       SENDGRID_API_KEY:
@@ -369,9 +369,9 @@ Still needs work on opening the peer port
       - ${TRANSMISSION_PEER_PORT}:${TRANSMISSION_PEER_PORT}
       - ${TRANSMISSION_PEER_PORT}:${TRANSMISSION_PEER_PORT}/udp
     volumes:
-      - /srv/config/transmission/config:/config
-      - /srv/config/transmission/watch:/watch
-      - /srv/config/transmission/downloads:/downloads
+      - ${VOLUMES_DIR}/transmission/config:/config
+      - ${VOLUMES_DIR}/transmission/watch:/watch
+      - ${VOLUMES_DIR}/transmission/downloads:/downloads
       - ${VIDEOS_DIR}:/downloads/videos
     environment:
       # proxy
@@ -411,7 +411,7 @@ https://haugene.github.io/docker-transmission-openvpn/
     ports:
       - ${TRANSMISSION_WEBUI_PORT}:9091/tcp
     volumes:
-      - /srv/config/transmission/config:/config/transmission-home
+      - ${VOLUMES_DIR}/transmission/config:/config/transmission-home
       - ${DOWNLOADS_DIR}:/downloads
       - ${DOWNLOADS_DIR}/.watch:/watch
       - ${VIDEOS_DIR}:/downloads/videos
@@ -454,7 +454,7 @@ https://haugene.github.io/docker-transmission-openvpn/
     ports:
       - ${HOME_ASSISTANT_LOCAL_PORT}:8123
     volumes:
-      - /srv/config/home-assistant/config:/config
+      - ${VOLUMES_DIR}/home-assistant/config:/config
       - /etc/localtime:/etc/localtime:ro
     environment:
       # proxy
@@ -479,7 +479,7 @@ https://haugene.github.io/docker-transmission-openvpn/
     ports:
       - ${ZWAVE_JS_LOCAL_PORT}:3000 # port for Z-Wave JS websocket server
     volumes:
-      - /srv/config/home-assistant/zwave:/usr/src/app/store
+      - ${VOLUMES_DIR}/home-assistant/zwave:/usr/src/app/store
     devices:
       - /dev/serial/by-id/usb-0658_0200-if00:/dev/zwave
     environment:
@@ -513,7 +513,7 @@ speech-to-text
     ports:
       - 10300:10300
     volumes:
-      - /srv/config/home-assistant/wyoming-whisper:/data
+      - ${VOLUMES_DIR}/home-assistant/wyoming-whisper:/data
     command: --model=distil-small.en --language=en
     networks:
       - hass
@@ -532,7 +532,7 @@ text-to-speech
     ports:
       - 10200:10200
     volumes:
-      - /srv/config/home-assistant/wyoming-piper:/data
+      - ${VOLUMES_DIR}/home-assistant/wyoming-piper:/data
     command: --voice=en_US-libritts_r-medium
     networks:
       - hass
@@ -566,7 +566,7 @@ wake word detection
     ports:
       - ${INFLUXDB_LOCAL_PORT}:8086
     volumes:
-      - /srv/config/grafana/influxdb:/var/lib/influxdb2
+      - ${VOLUMES_DIR}/grafana/influxdb:/var/lib/influxdb2
     networks:
       - grafana
       - hass
@@ -587,8 +587,8 @@ wake word detection
       - nextcloud-db
       - nextcloud-redis
     volumes:
-      - /srv/config/nextcloud/app:/var/www/html
-      # - /srv/config/nextcloud/opcache-recommended.ini:/usr/local/etc/php/conf.d/opcache-recommended.ini
+      - ${VOLUMES_DIR}/nextcloud/app:/var/www/html
+      # - ${VOLUMES_DIR}/nextcloud/opcache-recommended.ini:/usr/local/etc/php/conf.d/opcache-recommended.ini
       - ${DOWNLOADS_DIR}:/var/www/html/data/artem/files/downloads/amadeus
       - ${MUSIC_DIR}:/var/www/html/data/artem/files/music
       - ${PICTURES_DIR}:/var/www/html/data/artem/files/pictures
@@ -625,7 +625,7 @@ wake word detection
     ports:
       - ${NEXTCLOUD_LOCAL_PORT}:80
     volumes:
-      - /srv/config/nextcloud/app:/var/www/html:ro
+      - ${VOLUMES_DIR}/nextcloud/app:/var/www/html:ro
     environment:
       # proxy
       VIRTUAL_HOST: ${NEXTCLOUD_HOST}
@@ -649,8 +649,8 @@ wake word detection
       - nextcloud-db
       - nextcloud-redis
     volumes:
-      - /srv/config/nextcloud/app:/var/www/html
-      - /srv/config/nextcloud/cron:/var/spool/cron/crontabs
+      - ${VOLUMES_DIR}/nextcloud/app:/var/www/html
+      - ${VOLUMES_DIR}/nextcloud/cron:/var/spool/cron/crontabs
     networks:
       - nextcloud
 #+end_src
@@ -663,7 +663,7 @@ wake word detection
     container_name: nextcloud-db
     command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     volumes:
-      - /srv/config/nextcloud/db:/var/lib/mysql
+      - ${VOLUMES_DIR}/nextcloud/db:/var/lib/mysql
     environment:
       # app
       MARIADB_AUTO_UPGRADE: 1
@@ -700,7 +700,7 @@ wake word detection
     ports:
       - ${CALIBRE_BOOKS_LOCAL_PORT}:8083/tcp
     volumes:
-      - /srv/config/calibre/books:/config
+      - ${VOLUMES_DIR}/calibre/books:/config
       - ${BOOKS_DIR}:/books
     environment:
       # proxy
@@ -729,7 +729,7 @@ wake word detection
     ports:
       - ${CALIBRE_MANUALS_LOCAL_PORT}:8083/tcp
     volumes:
-      - /srv/config/calibre/manuals:/config
+      - ${VOLUMES_DIR}/calibre/manuals:/config
       - ${MANUALS_DIR}:/books
     environment:
       # proxy
@@ -759,7 +759,7 @@ wake word detection
       - ${CALIBRE_MNG_VNC_LOCAL_PORT}:8181/tcp
       - ${CALIBRE_MNG_LOCAL_PORT}:8081/tcp
     volumes:
-      - /srv/config/calibre/manager.books:/config
+      - ${VOLUMES_DIR}/calibre/manager.books:/config
       - ${BOOKS_DIR}:/books
     environment:
       # app
@@ -781,8 +781,8 @@ wake word detection
     depends_on:
       - webtrees-db
     volumes:
-      - /srv/config/webtrees/data:/var/www/webtrees/data
-      - /srv/config/webtrees/themes:/var/www/webtrees/modules_v4
+      - ${VOLUMES_DIR}/webtrees/data:/var/www/webtrees/data
+      - ${VOLUMES_DIR}/webtrees/themes:/var/www/webtrees/modules_v4
     environment:
       # proxy
       VIRTUAL_HOST: ${WEBTREES_HOST}
@@ -825,7 +825,7 @@ wake word detection
     container_name: webtrees-db
     command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     volumes:
-      - /srv/config/webtrees/db:/var/lib/mysql
+      - ${VOLUMES_DIR}/webtrees/db:/var/lib/mysql
     environment:
       # app
       MARIADB_AUTO_UPGRADE: 1
@@ -855,7 +855,7 @@ wake word detection
       - 6600:6600
       - 8800:8800
     volumes:
-      - /srv/config/mpd:/root/.config
+      - ${VOLUMES_DIR}/mpd:/root/.config
       - ${MUSIC_DIR}:/var/lib/mpd/music
       - ${PLAYLISTS_DIR}:/var/lib/mpd/playlists
     devices:
@@ -882,7 +882,7 @@ wake word detection
     ports:
       - ${NAVIDROME_LOCAL_PORT}:4533
     volumes:
-      - /srv/config/navidrome:/data
+      - ${VOLUMES_DIR}/navidrome:/data
       - ${MUSIC_DIR}:/music:ro
       - ${PLAYLISTS_DIR}:/playlists
     environment:
@@ -913,9 +913,9 @@ wake word detection
       - 1705:1705
       - 1780:1780
     volumes:
-      - ${CONFIG_DIR}/snapcast/config:/config
-      - ${CONFIG_DIR}/snapcast/data:/data
-      - ${CONFIG_DIR}/snapcast/fifos:/audio
+      - ${VOLUMES_DIR}/snapcast/config:/config
+      - ${VOLUMES_DIR}/snapcast/data:/data
+      - ${VOLUMES_DIR}/snapcast/fifos:/audio
     environment:
       # app
       PUID: ${UID}
@@ -973,7 +973,7 @@ wake word detection
     #   file: hwaccel.ml.yml
     #   service: cpu # set to one of [armnn, cuda, openvino, openvino-wsl] for accelerated inference - use the `-wsl` version for WSL2 where applicable
     volumes:
-      - /srv/config/immich/cache:/cache
+      - ${VOLUMES_DIR}/immich/cache:/cache
     networks:
       - immich
 #+end_src
@@ -986,7 +986,7 @@ wake word detection
     container_name: immich-db
     hostname: immich-db
     volumes:
-      - /srv/config/immich/db:/var/lib/postgresql/data
+      - ${VOLUMES_DIR}/immich/db:/var/lib/postgresql/data
     environment:
       # app
       POSTGRES_DB: ${IMMICH_DB_NAME}
@@ -1021,7 +1021,7 @@ wake word detection
       - ${DIGIKAM_PORT}:3306
     command: --max_allowed_packet=128M --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     volumes:
-      - /srv/config/digikam/db:/var/lib/mysql
+      - ${VOLUMES_DIR}/digikam/db:/var/lib/mysql
     environment:
       # app
       MARIADB_DATABASE: ${DIGIKAM_DB_NAME}
@@ -1051,8 +1051,8 @@ wake word detection
       - 32413:32413/udp
       - 32414:32414/udp
     volumes:
-      - /srv/config/plex/config:/config
-      - /srv/config/plex/transcode:/transcode
+      - ${VOLUMES_DIR}/plex/config:/config
+      - ${VOLUMES_DIR}/plex/transcode:/transcode
       - ${VIDEOS_DIR}:/data/videos
       - ${MUSIC_DIR}:/data/music
     environment:
@@ -1083,8 +1083,8 @@ wake word detection
     ports:
       - ${JELLYFIN_LOCAL_PORT}:8096/tcp
     volumes:
-      - /srv/config/jellyfin/config:/config
-      - /srv/config/jellyfin/cache:/cache
+      - ${VOLUMES_DIR}/jellyfin/config:/config
+      - ${VOLUMES_DIR}/jellyfin/cache:/cache
       - ${VIDEOS_DIR}:/media/videos:ro
     environment:
       # proxy
@@ -1105,7 +1105,7 @@ wake word detection
     image: justarchi/archisteamfarm:${ASF_VERSION}
     container_name: asf
     volumes:
-      - /srv/config/archi-steam-farm:/app/config
+      - ${VOLUMES_DIR}/archi-steam-farm:/app/config
     environment:
       # proxy
       VIRTUAL_HOST: ${ASF_HOST}
@@ -1124,7 +1124,7 @@ wake word detection
     image: kuklinistvan/anki-sync-server:${ANKI_VERSION}
     container_name: anki
     volumes:
-      - /srv/config/anki:/app/data
+      - ${VOLUMES_DIR}/anki:/app/data
     environment:
       # proxy
       VIRTUAL_HOST: ${ANKI_HOST}
