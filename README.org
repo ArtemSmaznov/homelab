@@ -189,11 +189,14 @@ services:
     <<: *service_default
     image: prom/prometheus:${PROMETHEUS_VERSION}
     container_name: prometheus
+    hostname: prometheus
+    user: ${UID}:${DGID}
     ports:
       - ${PROMETHEUS_LOCAL_PORT}:9090
     volumes:
       - ${VOLUMES_DIR}/prometheus/config:/etc/prometheus
       - ${VOLUMES_DIR}/prometheus/data:/prometheus
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - monitor
 #+end_src
