@@ -98,6 +98,18 @@ services:
       - grafana
       - hass
 
+  prometheus:
+    <<: *service_default
+    image: prom/prometheus:${PROMETHEUS_VERSION}
+    container_name: prometheus
+    ports:
+      - ${PROMETHEUS_LOCAL_PORT}:9090
+    volumes:
+      - ${VOLUMES_DIR}/prometheus/config:/etc/prometheus
+      - ${VOLUMES_DIR}/prometheus/data:/prometheus
+    networks:
+      - grafana
+
   proxy:
     build: ./proxy
     container_name: reverse-proxy

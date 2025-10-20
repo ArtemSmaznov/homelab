@@ -15,6 +15,7 @@
 - [[#dashboards][Dashboards]]
   - [[#home-page][Home page]]
   - [[#grafana][Grafana]]
+  - [[#prometheus][Prometheus]]
 - [[#networking][Networking]]
   - [[#pi-hole][Pi-hole]]
   - [[#reverse-proxy][Reverse proxy]]
@@ -176,6 +177,21 @@ services:
       - proxy-tier
       - grafana
       - hass
+#+end_src
+
+** Prometheus
+#+begin_src yaml
+  prometheus:
+    <<: *service_default
+    image: prom/prometheus:${PROMETHEUS_VERSION}
+    container_name: prometheus
+    ports:
+      - ${PROMETHEUS_LOCAL_PORT}:9090
+    volumes:
+      - ${VOLUMES_DIR}/prometheus/config:/etc/prometheus
+      - ${VOLUMES_DIR}/prometheus/data:/prometheus
+    networks:
+      - grafana
 #+end_src
 
 * Networking :net:
