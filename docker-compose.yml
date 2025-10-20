@@ -45,86 +45,6 @@ x-default: &service_default
 
 services:
 
-  home:
-    <<: *service_default
-    image: linuxserver/heimdall:${HOME_VERSION}
-    container_name: home
-    volumes:
-      - ${VOLUMES_DIR}/heimdall:/config
-    environment:
-      # proxy
-      VIRTUAL_HOST: ${HOME_HOST}
-      VIRTUAL_PORT: 443
-      VIRTUAL_PROTO: https
-      LETSENCRYPT_HOST: ${HOME_HOST}
-      LETSENCRYPT_EMAIL: ${MY_EMAIL}
-
-      # app
-      PUID: ${UID}
-      PGID: ${GID}
-      TZ: ${TIME_ZONE}
-    networks:
-      - proxy-tier
-
-  grafana:
-    <<: *service_default
-    image: grafana/grafana-oss:${GRAFANA_VERSION:-preview}
-    container_name: grafana
-    hostname: grafana
-    user: '${UID}'
-    ports:
-      - ${GRAFANA_LOCAL_PORT}:3000
-    volumes:
-      - ${VOLUMES_DIR}/grafana/app:/var/lib/grafana
-    environment:
-      # proxy
-      VIRTUAL_HOST: ${GRAFANA_HOST}
-      VIRTUAL_PORT: 3000
-      LETSENCRYPT_HOST: ${GRAFANA_HOST}
-      LETSENCRYPT_EMAIL: ${MY_EMAIL}
-
-      # app
-      GF_SERVER_ROOT_URL: https://${GRAFANA_HOST}
-      GF_SERVER_DOMAIN: ${MY_DOMAIN}
-
-      GF_DATE_FORMATS_FULL_DATE: ddd, D MMM YYYY - h:mm:ssa
-      GF_DATE_FORMATS_INTERVAL_SECOND: h:mm:ssa
-      GF_DATE_FORMATS_INTERVAL_MINUTE: h:mm
-      GF_DATE_FORMATS_INTERVAL_HOUR: D MMM HH:mm
-      GF_DATE_FORMATS_INTERVAL_DAY: D MMM
-      GF_DATE_FORMATS_INTERVAL_MONTH: MMM YYYY
-      GF_DATE_FORMATS_INTERVAL_YEAR: YYYY
-    networks:
-      - proxy-tier
-      - monitor
-      - hass
-
-  prometheus:
-    <<: *service_default
-    image: prom/prometheus:${PROMETHEUS_VERSION}
-    container_name: prometheus
-    hostname: prometheus
-    user: ${UID}:${DGID}
-    ports:
-      - ${PROMETHEUS_LOCAL_PORT}:9090
-    volumes:
-      - ${VOLUMES_DIR}/prometheus/config:/etc/prometheus
-      - ${VOLUMES_DIR}/prometheus/data:/prometheus
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - monitor
-
-  prometheus-zfs:
-    <<: *service_default
-    image: matusnovak/prometheus-zfs:${PROMETHEUS_ZFS_VERSION}
-    container_name: zfs
-    hostname: zfs
-    privileged: true
-    ports:
-      - ${PROMETHEUS_ZFS_LOCAL_PORT}:9901
-    networks:
-      - monitor
-
   proxy:
     build: ./proxy
     container_name: reverse-proxy
@@ -218,6 +138,86 @@ services:
       - proxy-tier
       - hass
 
+  home:
+    <<: *service_default
+    image: linuxserver/heimdall:${HOME_VERSION}
+    container_name: home
+    volumes:
+      - ${VOLUMES_DIR}/heimdall:/config
+    environment:
+      # proxy
+      VIRTUAL_HOST: ${HOME_HOST}
+      VIRTUAL_PORT: 443
+      VIRTUAL_PROTO: https
+      LETSENCRYPT_HOST: ${HOME_HOST}
+      LETSENCRYPT_EMAIL: ${MY_EMAIL}
+
+      # app
+      PUID: ${UID}
+      PGID: ${GID}
+      TZ: ${TIME_ZONE}
+    networks:
+      - proxy-tier
+
+  grafana:
+    <<: *service_default
+    image: grafana/grafana-oss:${GRAFANA_VERSION:-preview}
+    container_name: grafana
+    hostname: grafana
+    user: '${UID}'
+    ports:
+      - ${GRAFANA_LOCAL_PORT}:3000
+    volumes:
+      - ${VOLUMES_DIR}/grafana/app:/var/lib/grafana
+    environment:
+      # proxy
+      VIRTUAL_HOST: ${GRAFANA_HOST}
+      VIRTUAL_PORT: 3000
+      LETSENCRYPT_HOST: ${GRAFANA_HOST}
+      LETSENCRYPT_EMAIL: ${MY_EMAIL}
+
+      # app
+      GF_SERVER_ROOT_URL: https://${GRAFANA_HOST}
+      GF_SERVER_DOMAIN: ${MY_DOMAIN}
+
+      GF_DATE_FORMATS_FULL_DATE: ddd, D MMM YYYY - h:mm:ssa
+      GF_DATE_FORMATS_INTERVAL_SECOND: h:mm:ssa
+      GF_DATE_FORMATS_INTERVAL_MINUTE: h:mm
+      GF_DATE_FORMATS_INTERVAL_HOUR: D MMM HH:mm
+      GF_DATE_FORMATS_INTERVAL_DAY: D MMM
+      GF_DATE_FORMATS_INTERVAL_MONTH: MMM YYYY
+      GF_DATE_FORMATS_INTERVAL_YEAR: YYYY
+    networks:
+      - proxy-tier
+      - monitor
+      - hass
+
+  prometheus:
+    <<: *service_default
+    image: prom/prometheus:${PROMETHEUS_VERSION}
+    container_name: prometheus
+    hostname: prometheus
+    user: ${UID}:${DGID}
+    ports:
+      - ${PROMETHEUS_LOCAL_PORT}:9090
+    volumes:
+      - ${VOLUMES_DIR}/prometheus/config:/etc/prometheus
+      - ${VOLUMES_DIR}/prometheus/data:/prometheus
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - monitor
+
+  prometheus-zfs:
+    <<: *service_default
+    image: matusnovak/prometheus-zfs:${PROMETHEUS_ZFS_VERSION}
+    container_name: zfs
+    hostname: zfs
+    privileged: true
+    ports:
+      - ${PROMETHEUS_ZFS_LOCAL_PORT}:9901
+    networks:
+      - monitor
+
   hass:
     <<: *service_default
     image: ghcr.io/home-assistant/home-assistant:${HOME_ASSISTANT_VERSION}
@@ -239,6 +239,20 @@ services:
       - proxy-tier
       - hass
       - monitor
+
+  influxdb:
+    <<: *service_default
+    image: influxdb:${INFLUXDB_VERSION}
+    container_name: influxdb
+    depends_on:
+      - hass
+    ports:
+      - ${INFLUXDB_LOCAL_PORT}:8086
+    volumes:
+      - ${VOLUMES_DIR}/grafana/influxdb:/var/lib/influxdb2
+    networks:
+      - monitor
+      - hass
 
   zwave-js-ui:
     <<: *service_default
@@ -307,20 +321,6 @@ services:
       - 10400:10400
     command: --preload-model=ok_nabu
     networks:
-      - hass
-
-  grafana-influxdb:
-    <<: *service_default
-    image: influxdb:${INFLUXDB_VERSION}
-    container_name: grafana-influxdb
-    depends_on:
-      - hass
-    ports:
-      - ${INFLUXDB_LOCAL_PORT}:8086
-    volumes:
-      - ${VOLUMES_DIR}/grafana/influxdb:/var/lib/influxdb2
-    networks:
-      - monitor
       - hass
 
   nextcloud-app:
@@ -616,20 +616,6 @@ services:
       - proxy-tier
       - immich
 
-  immich-machine-learning:
-    <<: *service_default
-    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
-    container_name: immich-machine-learning
-    # For hardware acceleration, add one of -[armnn, cuda, openvino] to the image tag.
-    # Example tag: ${IMMICH_VERSION:-release}-cuda
-    # extends: # uncomment this section for hardware acceleration - see https://immich.app/docs/features/ml-hardware-acceleration
-    #   file: hwaccel.ml.yml
-    #   service: cpu # set to one of [armnn, cuda, openvino, openvino-wsl] for accelerated inference - use the `-wsl` version for WSL2 where applicable
-    volumes:
-      - ${VOLUMES_DIR}/immich/cache:/cache
-    networks:
-      - immich
-
   immich-db:
     <<: *service_default
     image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
@@ -828,6 +814,20 @@ services:
       - ${AI_MODELS_DIR}/speaches:/home/ubuntu/.cache/huggingface/hub
     networks:
       - ai
+
+  immich-machine-learning:
+    <<: *service_default
+    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
+    container_name: immich-machine-learning
+    # For hardware acceleration, add one of -[armnn, cuda, openvino] to the image tag.
+    # Example tag: ${IMMICH_VERSION:-release}-cuda
+    # extends: # uncomment this section for hardware acceleration - see https://immich.app/docs/features/ml-hardware-acceleration
+    #   file: hwaccel.ml.yml
+    #   service: cpu # set to one of [armnn, cuda, openvino, openvino-wsl] for accelerated inference - use the `-wsl` version for WSL2 where applicable
+    volumes:
+      - ${VOLUMES_DIR}/immich/cache:/cache
+    networks:
+      - immich
 
   jenkins:
     <<: *service_default

@@ -8,14 +8,15 @@
 #+startup:     overview
 #+property:    header-args :tangle docker-compose.yml
 #+auto_tangle: t
+#+filetags: :amadeus:
 
 * Table of Contents :toc:
 - [[#usage][Usage]]
 - [[#docker-compose][Docker-compose]]
-- [[#dashboards][Dashboards]]
-  - [[#home-page][Home page]]
-  - [[#grafana][Grafana]]
-  - [[#prometheus][Prometheus]]
+  - [[#networks][Networks]]
+  - [[#secrets][Secrets]]
+  - [[#templates][Templates]]
+  - [[#last][Last]]
 - [[#networking][Networking]]
   - [[#pi-hole][Pi-hole]]
   - [[#reverse-proxy][Reverse proxy]]
@@ -24,6 +25,10 @@
   - [[#hold-vpn][HOLD VPN]]
   - [[#kill-transmission][KILL Transmission]]
   - [[#transmission][Transmission]]
+- [[#observability][Observability]]
+  - [[#home-page][Home page]]
+  - [[#grafana][Grafana]]
+  - [[#prometheus][Prometheus]]
 - [[#automation][Automation]]
   - [[#home-assistant][Home Assistant]]
 - [[#documents][Documents]]
@@ -36,7 +41,7 @@
   - [[#hold-snapcast][HOLD Snapcast]]
 - [[#photos][Photos]]
   - [[#immich][Immich]]
-  - [[#digikam-db][DigiKam DB]]
+  - [[#digikam][DigiKam]]
 - [[#video][Video]]
   - [[#plex][Plex]]
   - [[#jellyfin][Jellyfin]]
@@ -48,6 +53,7 @@
   - [[#open-webui][Open WebUI]]
   - [[#ollama][Ollama]]
   - [[#speaches][Speaches]]
+  - [[#immich-machine-learning][Immich Machine Learning]]
 - [[#cicd][CICD]]
   - [[#jenkins][Jenkins]]
 
@@ -67,7 +73,8 @@ Update images
 docker-compose build --pull
 #+end_example
 
-* Docker-compose :amadeus:
+* Docker-compose
+** Networks
 #+begin_src yaml
 networks:
   proxy-tier:
@@ -87,6 +94,7 @@ networks:
   monitor:
 #+end_src
 
+** Secrets
 #+begin_src yaml
 secrets:
   db_password:
@@ -113,108 +121,16 @@ secrets:
     file: secrets/digikam/db_root_password
 #+end_src
 
+** Templates
 #+begin_src yaml
 x-default: &service_default
   tty: true # enable colorized logs
   restart: unless-stopped
 #+end_src
 
+** Last
 #+begin_src yaml
 services:
-#+end_src
-
-* Dashboards :amadeus:dashboard:
-** Home page
-#+begin_src yaml
-  home:
-    <<: *service_default
-    image: linuxserver/heimdall:${HOME_VERSION}
-    container_name: home
-    volumes:
-      - ${VOLUMES_DIR}/heimdall:/config
-    environment:
-      # proxy
-      VIRTUAL_HOST: ${HOME_HOST}
-      VIRTUAL_PORT: 443
-      VIRTUAL_PROTO: https
-      LETSENCRYPT_HOST: ${HOME_HOST}
-      LETSENCRYPT_EMAIL: ${MY_EMAIL}
-
-      # app
-      PUID: ${UID}
-      PGID: ${GID}
-      TZ: ${TIME_ZONE}
-    networks:
-      - proxy-tier
-#+end_src
-
-** Grafana
-#+begin_src yaml
-  grafana:
-    <<: *service_default
-    image: grafana/grafana-oss:${GRAFANA_VERSION:-preview}
-    container_name: grafana
-    hostname: grafana
-    user: '${UID}'
-    ports:
-      - ${GRAFANA_LOCAL_PORT}:3000
-    volumes:
-      - ${VOLUMES_DIR}/grafana/app:/var/lib/grafana
-    environment:
-      # proxy
-      VIRTUAL_HOST: ${GRAFANA_HOST}
-      VIRTUAL_PORT: 3000
-      LETSENCRYPT_HOST: ${GRAFANA_HOST}
-      LETSENCRYPT_EMAIL: ${MY_EMAIL}
-
-      # app
-      GF_SERVER_ROOT_URL: https://${GRAFANA_HOST}
-      GF_SERVER_DOMAIN: ${MY_DOMAIN}
-
-      GF_DATE_FORMATS_FULL_DATE: ddd, D MMM YYYY - h:mm:ssa
-      GF_DATE_FORMATS_INTERVAL_SECOND: h:mm:ssa
-      GF_DATE_FORMATS_INTERVAL_MINUTE: h:mm
-      GF_DATE_FORMATS_INTERVAL_HOUR: D MMM HH:mm
-      GF_DATE_FORMATS_INTERVAL_DAY: D MMM
-      GF_DATE_FORMATS_INTERVAL_MONTH: MMM YYYY
-      GF_DATE_FORMATS_INTERVAL_YEAR: YYYY
-    networks:
-      - proxy-tier
-      - monitor
-      - hass
-#+end_src
-
-** Prometheus
-*** App
-#+begin_src yaml
-  prometheus:
-    <<: *service_default
-    image: prom/prometheus:${PROMETHEUS_VERSION}
-    container_name: prometheus
-    hostname: prometheus
-    user: ${UID}:${DGID}
-    ports:
-      - ${PROMETHEUS_LOCAL_PORT}:9090
-    volumes:
-      - ${VOLUMES_DIR}/prometheus/config:/etc/prometheus
-      - ${VOLUMES_DIR}/prometheus/data:/prometheus
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - monitor
-#+end_src
-
-*** ZFS
-#+begin_src yaml
-  prometheus-zfs:
-    <<: *service_default
-    image: matusnovak/prometheus-zfs:${PROMETHEUS_ZFS_VERSION}
-    container_name: zfs
-    hostname: zfs
-    privileged: true
-    ports:
-      - ${PROMETHEUS_ZFS_LOCAL_PORT}:9901
-    networks:
-      - monitor
 #+end_src
 
 * Networking :net:
@@ -483,7 +399,101 @@ https://haugene.github.io/docker-transmission-openvpn/
       - hass
 #+end_src
 
-* Automation :amadeus:
+* Observability :observability:
+** Home page :dash:
+#+begin_src yaml
+  home:
+    <<: *service_default
+    image: linuxserver/heimdall:${HOME_VERSION}
+    container_name: home
+    volumes:
+      - ${VOLUMES_DIR}/heimdall:/config
+    environment:
+      # proxy
+      VIRTUAL_HOST: ${HOME_HOST}
+      VIRTUAL_PORT: 443
+      VIRTUAL_PROTO: https
+      LETSENCRYPT_HOST: ${HOME_HOST}
+      LETSENCRYPT_EMAIL: ${MY_EMAIL}
+
+      # app
+      PUID: ${UID}
+      PGID: ${GID}
+      TZ: ${TIME_ZONE}
+    networks:
+      - proxy-tier
+#+end_src
+
+** Grafana :dash:
+#+begin_src yaml
+  grafana:
+    <<: *service_default
+    image: grafana/grafana-oss:${GRAFANA_VERSION:-preview}
+    container_name: grafana
+    hostname: grafana
+    user: '${UID}'
+    ports:
+      - ${GRAFANA_LOCAL_PORT}:3000
+    volumes:
+      - ${VOLUMES_DIR}/grafana/app:/var/lib/grafana
+    environment:
+      # proxy
+      VIRTUAL_HOST: ${GRAFANA_HOST}
+      VIRTUAL_PORT: 3000
+      LETSENCRYPT_HOST: ${GRAFANA_HOST}
+      LETSENCRYPT_EMAIL: ${MY_EMAIL}
+
+      # app
+      GF_SERVER_ROOT_URL: https://${GRAFANA_HOST}
+      GF_SERVER_DOMAIN: ${MY_DOMAIN}
+
+      GF_DATE_FORMATS_FULL_DATE: ddd, D MMM YYYY - h:mm:ssa
+      GF_DATE_FORMATS_INTERVAL_SECOND: h:mm:ssa
+      GF_DATE_FORMATS_INTERVAL_MINUTE: h:mm
+      GF_DATE_FORMATS_INTERVAL_HOUR: D MMM HH:mm
+      GF_DATE_FORMATS_INTERVAL_DAY: D MMM
+      GF_DATE_FORMATS_INTERVAL_MONTH: MMM YYYY
+      GF_DATE_FORMATS_INTERVAL_YEAR: YYYY
+    networks:
+      - proxy-tier
+      - monitor
+      - hass
+#+end_src
+
+** Prometheus
+*** App
+#+begin_src yaml
+  prometheus:
+    <<: *service_default
+    image: prom/prometheus:${PROMETHEUS_VERSION}
+    container_name: prometheus
+    hostname: prometheus
+    user: ${UID}:${DGID}
+    ports:
+      - ${PROMETHEUS_LOCAL_PORT}:9090
+    volumes:
+      - ${VOLUMES_DIR}/prometheus/config:/etc/prometheus
+      - ${VOLUMES_DIR}/prometheus/data:/prometheus
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - monitor
+#+end_src
+
+*** ZFS
+#+begin_src yaml
+  prometheus-zfs:
+    <<: *service_default
+    image: matusnovak/prometheus-zfs:${PROMETHEUS_ZFS_VERSION}
+    container_name: zfs
+    hostname: zfs
+    privileged: true
+    ports:
+      - ${PROMETHEUS_ZFS_LOCAL_PORT}:9901
+    networks:
+      - monitor
+#+end_src
+
+* Automation 
 ** Home Assistant :ha:home:
 *** App
 #+begin_src yaml
@@ -508,6 +518,23 @@ https://haugene.github.io/docker-transmission-openvpn/
       - proxy-tier
       - hass
       - monitor
+#+end_src
+
+*** Database :db:
+#+begin_src yaml
+  influxdb:
+    <<: *service_default
+    image: influxdb:${INFLUXDB_VERSION}
+    container_name: influxdb
+    depends_on:
+      - hass
+    ports:
+      - ${INFLUXDB_LOCAL_PORT}:8086
+    volumes:
+      - ${VOLUMES_DIR}/grafana/influxdb:/var/lib/influxdb2
+    networks:
+      - monitor
+      - hass
 #+end_src
 
 *** Z-Wave JS UI :plug:
@@ -598,24 +625,7 @@ wake word detection
       - hass
 #+end_src
 
-*** Influx DB :db:
-#+begin_src yaml
-  grafana-influxdb:
-    <<: *service_default
-    image: influxdb:${INFLUXDB_VERSION}
-    container_name: grafana-influxdb
-    depends_on:
-      - hass
-    ports:
-      - ${INFLUXDB_LOCAL_PORT}:8086
-    volumes:
-      - ${VOLUMES_DIR}/grafana/influxdb:/var/lib/influxdb2
-    networks:
-      - monitor
-      - hass
-#+end_src
-
-* Documents :amadeus:doc:
+* Documents :doc:
 ** Nextcloud :nc:
 *** App
 #+begin_src yaml
@@ -885,7 +895,7 @@ wake word detection
       - webtrees
 #+end_src
 
-* Music :amadeus:music:
+* Music :music:
 ** HOLD MPD
 :PROPERTIES:
 :header-args: :tangle no
@@ -967,7 +977,7 @@ wake word detection
       TZ: ${TIME_ZONE}
 #+end_src
 
-* Photos :amadeus:photo:
+* Photos :photo:
 ** Immich
 *** App
 #+begin_src yaml
@@ -1005,23 +1015,6 @@ wake word detection
       - immich
 #+end_src
 
-*** Machine Learning :ai:
-#+begin_src yaml
-  immich-machine-learning:
-    <<: *service_default
-    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
-    container_name: immich-machine-learning
-    # For hardware acceleration, add one of -[armnn, cuda, openvino] to the image tag.
-    # Example tag: ${IMMICH_VERSION:-release}-cuda
-    # extends: # uncomment this section for hardware acceleration - see https://immich.app/docs/features/ml-hardware-acceleration
-    #   file: hwaccel.ml.yml
-    #   service: cpu # set to one of [armnn, cuda, openvino, openvino-wsl] for accelerated inference - use the `-wsl` version for WSL2 where applicable
-    volumes:
-      - ${VOLUMES_DIR}/immich/cache:/cache
-    networks:
-      - immich
-#+end_src
-
 *** Database :db:
 #+begin_src yaml
   immich-db:
@@ -1055,7 +1048,8 @@ wake word detection
       - immich
 #+end_src
 
-** DigiKam DB :db:
+** DigiKam
+*** Database :db:
 #+begin_src yaml
   digikam-db:
     <<: *service_default
@@ -1077,7 +1071,7 @@ wake word detection
       - digikam_db_root_password
 #+end_src
 
-* Video :amadeus:video:
+* Video :video:
 ** Plex
 #+begin_src yaml
   plex:
@@ -1141,7 +1135,7 @@ wake word detection
       - hass
 #+end_src
 
-* Games :amadeus:game:
+* Games :game:
 ** Archi Steam Farm
 #+begin_src yaml
   asf:
@@ -1160,7 +1154,7 @@ wake word detection
       - proxy-tier
 #+end_src
 
-* Misc :amadeus:
+* Misc 
 ** Anki :study:
 #+begin_src yaml
   anki:
@@ -1180,7 +1174,7 @@ wake word detection
       - proxy-tier
 #+end_src
 
-* AI :amadeus:ai:
+* AI :ai:
 ** Open WebUI :ui:
 #+begin_src yaml
   open_webui:
@@ -1254,7 +1248,25 @@ wake word detection
     networks:
       - ai
 #+end_src
-* CICD :amadeus:cicd:
+
+** Immich Machine Learning :ai:photo:
+#+begin_src yaml
+  immich-machine-learning:
+    <<: *service_default
+    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
+    container_name: immich-machine-learning
+    # For hardware acceleration, add one of -[armnn, cuda, openvino] to the image tag.
+    # Example tag: ${IMMICH_VERSION:-release}-cuda
+    # extends: # uncomment this section for hardware acceleration - see https://immich.app/docs/features/ml-hardware-acceleration
+    #   file: hwaccel.ml.yml
+    #   service: cpu # set to one of [armnn, cuda, openvino, openvino-wsl] for accelerated inference - use the `-wsl` version for WSL2 where applicable
+    volumes:
+      - ${VOLUMES_DIR}/immich/cache:/cache
+    networks:
+      - immich
+#+end_src
+
+* CICD :cicd:
 ** Jenkins
 #+begin_src yaml
   jenkins:
