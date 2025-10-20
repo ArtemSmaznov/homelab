@@ -70,6 +70,7 @@ services:
     <<: *service_default
     image: grafana/grafana-oss:${GRAFANA_VERSION:-preview}
     container_name: grafana
+    hostname: grafana
     user: '${UID}'
     ports:
       - ${GRAFANA_LOCAL_PORT}:3000
