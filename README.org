@@ -490,6 +490,7 @@ https://haugene.github.io/docker-transmission-openvpn/
     <<: *service_default
     image: ghcr.io/home-assistant/home-assistant:${HOME_ASSISTANT_VERSION}
     container_name: home-assistant
+    hostname: hass
     privileged: true
     ports:
       - ${HOME_ASSISTANT_LOCAL_PORT}:8123
@@ -505,6 +506,7 @@ https://haugene.github.io/docker-transmission-openvpn/
     networks:
       - proxy-tier
       - hass
+      - monitor
 #+end_src
 
 *** Z-Wave JS UI :plug:

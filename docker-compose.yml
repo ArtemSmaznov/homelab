@@ -221,6 +221,7 @@ services:
     <<: *service_default
     image: ghcr.io/home-assistant/home-assistant:${HOME_ASSISTANT_VERSION}
     container_name: home-assistant
+    hostname: hass
     privileged: true
     ports:
       - ${HOME_ASSISTANT_LOCAL_PORT}:8123
@@ -236,6 +237,7 @@ services:
     networks:
       - proxy-tier
       - hass
+      - monitor
 
   zwave-js-ui:
     <<: *service_default
