@@ -113,6 +113,17 @@ services:
     networks:
       - monitor
 
+  prometheus-zfs:
+    <<: *service_default
+    image: matusnovak/prometheus-zfs:${PROMETHEUS_ZFS_VERSION}
+    container_name: zfs
+    hostname: zfs
+    privileged: true
+    ports:
+      - ${PROMETHEUS_ZFS_LOCAL_PORT}:9901
+    networks:
+      - monitor
+
   proxy:
     build: ./proxy
     container_name: reverse-proxy
