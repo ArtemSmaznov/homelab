@@ -238,6 +238,7 @@ services:
     networks:
       - proxy-tier
       - hass
+      - monitor
 
   zwave-js-ui:
     <<: *service_default

@@ -507,6 +507,7 @@ https://haugene.github.io/docker-transmission-openvpn/
     networks:
       - proxy-tier
       - hass
+      - monitor
 #+end_src
 
 *** Z-Wave JS UI :plug:
