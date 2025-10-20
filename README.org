@@ -84,8 +84,9 @@ networks:
   vpn:
   calibre:
   webtrees:
-  grafana:
+  monitor:
 #+end_src
+
 #+begin_src yaml
 secrets:
   db_password:
@@ -111,14 +112,17 @@ secrets:
   digikam_db_root_password:
     file: secrets/digikam/db_root_password
 #+end_src
+
 #+begin_src yaml
 x-default: &service_default
   tty: true # enable colorized logs
   restart: unless-stopped
 #+end_src
+
 #+begin_src yaml
 services:
 #+end_src
+
 * Dashboards :amadeus:dashboard:
 ** Home page
 #+begin_src yaml
@@ -175,7 +179,7 @@ services:
       GF_DATE_FORMATS_INTERVAL_YEAR: YYYY
     networks:
       - proxy-tier
-      - grafana
+      - monitor
       - hass
 #+end_src
 
@@ -191,7 +195,7 @@ services:
       - ${VOLUMES_DIR}/prometheus/config:/etc/prometheus
       - ${VOLUMES_DIR}/prometheus/data:/prometheus
     networks:
-      - grafana
+      - monitor
 #+end_src
 
 * Networking :net:
@@ -586,9 +590,10 @@ wake word detection
     volumes:
       - ${VOLUMES_DIR}/grafana/influxdb:/var/lib/influxdb2
     networks:
-      - grafana
+      - monitor
       - hass
 #+end_src
+
 * Documents :amadeus:doc:
 ** Nextcloud :nc:
 *** App

@@ -13,7 +13,7 @@ networks:
   vpn:
   calibre:
   webtrees:
-  grafana:
+  monitor:
 
 secrets:
   db_password:
@@ -95,7 +95,7 @@ services:
       GF_DATE_FORMATS_INTERVAL_YEAR: YYYY
     networks:
       - proxy-tier
-      - grafana
+      - monitor
       - hass
 
   prometheus:
@@ -108,7 +108,7 @@ services:
       - ${VOLUMES_DIR}/prometheus/config:/etc/prometheus
       - ${VOLUMES_DIR}/prometheus/data:/prometheus
     networks:
-      - grafana
+      - monitor
 
   proxy:
     build: ./proxy
@@ -303,7 +303,7 @@ services:
     volumes:
       - ${VOLUMES_DIR}/grafana/influxdb:/var/lib/influxdb2
     networks:
-      - grafana
+      - monitor
       - hass
 
   nextcloud-app:
