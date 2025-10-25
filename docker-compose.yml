@@ -233,6 +233,19 @@ services:
     networks:
       - monitor
 
+  prometheus-apc-exporter:
+    <<: *service_default
+    image: jangrewe/apcupsd-exporter:${PROMETHEUS_APC_EXPORTER_VERSION}
+    container_name: apc_exporter
+    hostname: apc_exporter
+    depends_on:
+      - apc
+    command: -apcupsd.addr apc:3551
+    ports:
+      - ${PROMETHEUS_APC_EXPORTER_LOCAL_PORT}:9162
+    networks:
+      - monitor
+
   apc:
     <<: *service_default
     image: gregewing/apcupsd:${APC_VERSION}

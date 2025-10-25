@@ -494,7 +494,7 @@ https://haugene.github.io/docker-transmission-openvpn/
       - monitor
 #+end_src
 
-*** Node Exporter
+*** Node exporter
 #+begin_src yaml
   prometheus-node-exporter:
     <<: *service_default
@@ -508,6 +508,22 @@ https://haugene.github.io/docker-transmission-openvpn/
       - ${PROMETHEUS_NODE_EXPORTER_LOCAL_PORT}:9100
     volumes:
       - /:/host:ro,rslave
+    networks:
+      - monitor
+#+end_src
+
+*** APC UPS exporter
+#+begin_src yaml
+  prometheus-apc-exporter:
+    <<: *service_default
+    image: jangrewe/apcupsd-exporter:${PROMETHEUS_APC_EXPORTER_VERSION}
+    container_name: apc_exporter
+    hostname: apc_exporter
+    depends_on:
+      - apc
+    command: -apcupsd.addr apc:3551
+    ports:
+      - ${PROMETHEUS_APC_EXPORTER_LOCAL_PORT}:9162
     networks:
       - monitor
 #+end_src
