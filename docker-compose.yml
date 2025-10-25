@@ -233,6 +233,31 @@ services:
     networks:
       - monitor
 
+  apc:
+    <<: *service_default
+    image: gregewing/apcupsd:${APC_VERSION}
+    container_name: apc
+    hostname: apc
+    ports:
+      - ${APC_LOCAL_PORT}:3551
+    volumes:
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
+      - /run/apcupsd:/run/apcupsd
+      - ${VOLUMES_DIR}/apc:/etc/apcupsd
+    devices:
+      - /dev/usb/hiddev0
+    environment:
+      TZ: ${TIME_ZONE}
+    healthcheck:
+      test: ["CMD-SHELL", "apcaccess | grep -E 'ONLINE' >> /dev/null"] # Command to check health
+      interval: 30s # Interval between health checks
+      timeout: 5s # Timeout for each health check
+      retries: 3 # How many times to retry
+      start_period: 15s # Estimated time to boot
+    networks:
+      - hass
+      - monitor
+
   hass:
     <<: *service_default
     image: ghcr.io/home-assistant/home-assistant:${HOME_ASSISTANT_VERSION}
