@@ -493,6 +493,24 @@ https://haugene.github.io/docker-transmission-openvpn/
       - monitor
 #+end_src
 
+*** Node Exporter
+#+begin_src yaml
+  prometheus-node-exporter:
+    <<: *service_default
+    image: quay.io/prometheus/node-exporter:${PROMETHEUS_NODE_EXPORTER_VERSION}
+    container_name: node_exporter
+    hostname: node_exporter
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    ports:
+      - ${PROMETHEUS_NODE_EXPORTER_LOCAL_PORT}:9100
+    volumes:
+      - /:/host:ro,rslave
+    networks:
+      - monitor
+#+end_src
+
 * Automation 
 ** Home Assistant :ha:home:
 *** App
@@ -520,7 +538,7 @@ https://haugene.github.io/docker-transmission-openvpn/
       - monitor
 #+end_src
 
-*** Database :db:
+*** InfluxDB :db:
 #+begin_src yaml
   influxdb:
     <<: *service_default

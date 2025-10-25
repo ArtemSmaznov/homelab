@@ -218,6 +218,21 @@ services:
     networks:
       - monitor
 
+  prometheus-node-exporter:
+    <<: *service_default
+    image: quay.io/prometheus/node-exporter:${PROMETHEUS_NODE_EXPORTER_VERSION}
+    container_name: node_exporter
+    hostname: node_exporter
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    ports:
+      - ${PROMETHEUS_NODE_EXPORTER_LOCAL_PORT}:9100
+    volumes:
+      - /:/host:ro,rslave
+    networks:
+      - monitor
+
   hass:
     <<: *service_default
     image: ghcr.io/home-assistant/home-assistant:${HOME_ASSISTANT_VERSION}
