@@ -172,7 +172,6 @@ services:
     environment:
       FTLCONF_LOCAL_IPV4: ${MY_SERVER_IP}
       WEBPASSWORD_FILE: /run/secrets/pihole_password
-      FTLCONF_webserver_api_password: /run/secrets/pihole_password
         # if using docker's default `bridge` network setting the dns listening mode should be set to 'all'
       FTLCONF_dns_listeningMode: 'all'
 
