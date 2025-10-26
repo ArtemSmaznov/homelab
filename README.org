@@ -180,6 +180,8 @@ services:
         # if using docker's default `bridge` network setting the dns listening mode should be set to 'all'
       FTLCONF_dns_listeningMode: 'all'
 
+      PIHOLE_UID: ${UID}
+      PIHOLE_GID: ${DGID}
       PROXY_LOCATION: pi-hole
       TZ: ${TIME_ZONE}
     extra_hosts:
