@@ -29,8 +29,8 @@ services:
       # uncomment the line below if you are using pi-hole as your ntp server
       - 123:123/udp
     volumes:
-      - /home/pi-hole/etc:/etc/pihole
-      - /home/pi-hole/dnsmasq.d:/etc/dnsmasq.d
+      - {VOLUMES_DIR}/pi-hole/etc:/etc/pihole
+      - {VOLUMES_DIR}/pi-hole/dnsmasq.d:/etc/dnsmasq.d
     environment:
       FTLCONF_LOCAL_IPV4: ${MY_SERVER_IP}
       WEBPASSWORD_FILE: /run/secrets/pihole_password
