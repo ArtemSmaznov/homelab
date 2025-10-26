@@ -25,8 +25,8 @@ services:
       - ${PIHOLE_LOCAL_DHCP_PORT}:67/udp
       - ${PIHOLE_LOCAL_NTP_PORT}:123/udp
     volumes:
-      - {VOLUMES_DIR}/pi-hole/etc:/etc/pihole
-      - {VOLUMES_DIR}/pi-hole/dnsmasq.d:/etc/dnsmasq.d
+      - ${VOLUMES_DIR}/pi-hole/etc:/etc/pihole
+      - ${VOLUMES_DIR}/pi-hole/dnsmasq.d:/etc/dnsmasq.d
     environment:
       FTLCONF_LOCAL_IPV4: ${MY_SERVER_IP}
       WEBPASSWORD_FILE: /run/secrets/pihole_password
