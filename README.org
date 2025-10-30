@@ -1083,6 +1083,7 @@ wake word detection
     networks:
       - proxy-tier
       - immich
+      - monitor
 #+end_src
 
 *** Database :db:

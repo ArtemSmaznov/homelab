@@ -669,6 +669,7 @@ services:
     networks:
       - proxy-tier
       - immich
+      - monitor
 
   immich-db:
     <<: *service_default
