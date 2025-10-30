@@ -657,6 +657,7 @@ services:
       LETSENCRYPT_EMAIL: ${MY_EMAIL}
 
       # app
+      IMMICH_TELEMETRY_INCLUDE: all
       DB_DATABASE_NAME: ${IMMICH_DB_NAME}
       DB_USERNAME: ${IMMICH_DB_USER}
       DB_PASSWORD: /run/secrets/immich_db_password
