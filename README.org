@@ -414,7 +414,7 @@ https://haugene.github.io/docker-transmission-openvpn/
     image: linuxserver/heimdall:${HOME_VERSION}
     container_name: home
     volumes:
-      - ${VOLUMES_DIR}/heimdall:/config
+      - ${VOLUMES_DIR}/heimdall:/config/www
     environment:
       # proxy
       VIRTUAL_HOST: ${HOME_HOST}
