@@ -39,6 +39,7 @@
 - [[#music][Music]]
   - [[#hold-mpd][HOLD MPD]]
   - [[#navidrome][Navidrome]]
+  - [[#maloja][Maloja]]
   - [[#hold-snapcast][HOLD Snapcast]]
 - [[#photos][Photos]]
   - [[#immich][Immich]]
@@ -78,21 +79,22 @@ docker-compose build --pull
 ** Networks
 #+begin_src yaml
 networks:
-  proxy-tier:
-    ipam:
-      config:
-        - subnet: 172.10.0.0/24
+  ai:
+  calibre:
   hass:
     ipam:
       config:
         - subnet: 172.11.0.0/24
-  nextcloud:
   immich:
-  ai:
-  vpn:
-  calibre:
-  webtrees:
   monitor:
+  music:
+  nextcloud:
+  proxy-tier:
+    ipam:
+      config:
+        - subnet: 172.10.0.0/24
+  vpn:
+  webtrees:
 #+end_src
 
 ** Secrets
@@ -1017,8 +1019,31 @@ wake word detection
 
       # app
       ND_CONFIGFILE: /data/navidrome.toml
+      ND_LISTENBRAINZ_BASEURL: http://maloja:${MALOJA_LOCAL_PORT}/apis/listenbrainz/1
     networks:
       - proxy-tier
+      - music
+#+end_src
+
+** Maloja
+Music scrobble
+#+begin_src yaml
+  maloja:
+    <<: *service_default
+    image: krateng/maloja:${MALOJA_VERSION}
+    container_name: maloja
+    hostname: maloja
+    ports:
+      - ${MALOJA_LOCAL_PORT}:42010
+    volumes:
+      - ${VOLUMES_DIR}/maloja/config:/config/config
+      - ${VOLUMES_DIR}/maloja/data:/config/state
+    environment:
+      # app
+      PUID: ${UID}
+      PGID: ${GID}
+    networks:
+      - music
 #+end_src
 
 ** HOLD Snapcast
