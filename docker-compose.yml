@@ -650,10 +650,17 @@ services:
       - ${VOLUMES_DIR}/maloja/config:/config/config
       - ${VOLUMES_DIR}/maloja/data:/config/state
     environment:
+      # proxy
+      VIRTUAL_HOST: ${MALOJA_HOST}
+      VIRTUAL_PORT: 42010
+      LETSENCRYPT_HOST: ${MALOJA_HOST}
+      LETSENCRYPT_EMAIL: ${MY_EMAIL}
+
       # app
       PUID: ${UID}
       PGID: ${GID}
     networks:
+      - proxy-tier
       - music
 
   immich:
