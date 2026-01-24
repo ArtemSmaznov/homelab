@@ -653,6 +653,7 @@ services:
       # app
       PUID: ${UID}
       PGID: ${GID}
+      MALOJA_LOCATION_TIMEZONE: ${TIME_ZONE}
     networks:
       - music
 
