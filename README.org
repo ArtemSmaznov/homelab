@@ -1042,6 +1042,7 @@ Music scrobble
       # app
       PUID: ${UID}
       PGID: ${GID}
+      TZ: ${TIME_ZONE}
       MALOJA_LOCATION_TIMEZONE: ${TIME_ZONE}
     networks:
       - music
