@@ -51,6 +51,7 @@
   - [[#archi-steam-farm][Archi Steam Farm]]
 - [[#misc][Misc]]
   - [[#anki][Anki]]
+  - [[#find-my-device][Find my device]]
 - [[#ai][AI]]
   - [[#open-webui][Open WebUI]]
   - [[#ollama][Ollama]]
@@ -1268,6 +1269,30 @@ Music scrobble
       VIRTUAL_PORT: 27701
       LETSENCRYPT_HOST: ${ANKI_HOST}
       LETSENCRYPT_EMAIL: ${MY_EMAIL}
+    networks:
+      - proxy-tier
+#+end_src
+
+** Find my device
+#+begin_src yaml
+  find-my-device:
+    <<: *service_default
+    image: registry.gitlab.com/fmd-foss/fmd-server:${FMD_VERSION}
+    container_name: find-my-device
+    hostname: find-my-device
+    ports:
+      - ${FMD_LOCAL_PORT}:8080
+    volumes:
+      - ${VOLUMES_DIR}/find-my-device:/var/lib/fmd-server/db
+    environment:
+      # proxy
+      VIRTUAL_HOST: ${FMD_HOST}
+      VIRTUAL_PORT: 8080
+      LETSENCRYPT_HOST: ${FMD_HOST}
+      LETSENCRYPT_EMAIL: ${MY_EMAIL}
+
+      # app
+      TZ: ${TIME_ZONE}
     networks:
       - proxy-tier
 #+end_src
