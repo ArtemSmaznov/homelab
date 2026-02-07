@@ -1318,7 +1318,7 @@ Music scrobble
 
       # app
       OLLAMA_BASE_URL: http://ollama:${OLLAMA_LOCAL_PORT}
-      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN}
+      CORS_ALLOW_ORIGIN: ${OPEN_WEBUI_CORS_ALLOW_ORIGIN}
     networks:
       - proxy-tier
       - ai
