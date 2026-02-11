@@ -7,8 +7,8 @@ def testing() {
 
   def tags = readJSON text: tags_json
 
-  tags.each { tag ->
-    println tag
+  tags.results.each { tag ->
+    println tag.name
   }
 
 }
