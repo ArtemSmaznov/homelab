@@ -17,7 +17,9 @@ pipeline {
             script: "curl https://hub.docker.com/v2/repositories/${repository}/tags"
           )
 
-          println tags_json
+          def tags = readJSON text: tags_json
+
+          println tags
         }
       }
     }
