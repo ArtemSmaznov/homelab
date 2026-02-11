@@ -11,8 +11,13 @@ pipeline {
     stage('Main') {
       steps {
         script {
-          print "Hello, World!"
-          sh "curl https://hub.docker.com/v2/repositories/jenkins/jenkins/tags"
+          def repository = "jenkins/jenkins"
+          def tags_json = sh(
+            returnStdout: true,
+            script: "curl https://hub.docker.com/v2/repositories/${repository}/tags"
+          )
+
+          println tags_json
         }
       }
     }
