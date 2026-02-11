@@ -1,3 +1,18 @@
+def testing() {
+  def repository = "jenkins/jenkins"
+  def tags_json = sh(
+    returnStdout: true,
+    script: "curl https://hub.docker.com/v2/repositories/${repository}/tags"
+  )
+
+  def tags = readJSON text: tags_json
+
+  tags.each { tag ->
+    println tag
+  }
+
+}
+
 pipeline {
   agent {
     label 'master'
@@ -11,15 +26,7 @@ pipeline {
     stage('Main') {
       steps {
         script {
-          def repository = "jenkins/jenkins"
-          def tags_json = sh(
-            returnStdout: true,
-            script: "curl https://hub.docker.com/v2/repositories/${repository}/tags"
-          )
-
-          def tags = readJSON text: tags_json
-
-          println tags
+          testing()
         }
       }
     }
