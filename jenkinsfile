@@ -1,34 +1,39 @@
-def testing() {
-  def repository = "jenkins/jenkins"
-  def tags_json = sh(
-    returnStdout: true,
-    script: "curl https://hub.docker.com/v2/repositories/${repository}/tags"
-  )
+pipeline {
+    agent {
+        label 'master'
+    }
 
-  def tags = readJSON text: tags_json
+    options {
+        timeout( time: 30, unit: 'MINUTES' )
+    }
 
-  tags.results.each { tag ->
-    println tag.name
-  }
-
+    stages {
+        stage('Main') {
+            steps {
+                script {
+                    list_versioned_containers()
+                }
+            }
+        }
+    }
 }
 
-pipeline {
-  agent {
-    label 'master'
-  }
 
-  options {
-    timeout( time: 30, unit: 'MINUTES' )
-  }
+def list_versioned_containers() {
+    def repository = "jenkins/jenkins"
+    list_version_tags(repository)
+}
 
-  stages {
-    stage('Main') {
-      steps {
-        script {
-          testing()
-        }
-      }
+def list_version_tags(repository) {
+    def tags_json = sh(
+        returnStdout: true,
+        script: "curl https://hub.docker.com/v2/repositories/${repository}/tags"
+    )
+
+    def tags = readJSON text: tags_json
+
+    print "[ ${repository} ]"
+    tags.results.each { tag ->
+        print tag.name
     }
-  }
 }
