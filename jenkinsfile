@@ -30,7 +30,8 @@ def list_current_versions() {
     def docker_compose = readYaml(file: "docker-compose.yml")
 
     def versions = []
-    docker_compose.services.each { container ->
+    for (container in docker_compose.services) { 
+        if (container.image) { continue }
         versions.add(container)
     }
 
