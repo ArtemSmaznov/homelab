@@ -31,7 +31,7 @@ def list_current_versions() {
 
     def versions = []
     for (container in docker_compose.services) { 
-        if (container.image) { continue }
+        if (container["image"]) { continue }
         versions.add(container)
     }
 
