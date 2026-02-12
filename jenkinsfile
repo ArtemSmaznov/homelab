@@ -29,9 +29,11 @@ def list_versioned_containers() {
 def list_current_versions() {
     def docker_compose = readYaml(file: "docker-compose.yml")
 
+    println docker_compose
+
     def versions = []
     for (container in docker_compose.services) { 
-        versions.add(container.getClass())
+        versions.add(container.)
     }
 
     println "Current version tags: \n ${versions.join('\n ')}"
