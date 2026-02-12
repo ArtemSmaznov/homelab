@@ -37,5 +37,5 @@ def list_version_tags(repository) {
         results.add(tag.name)
     }
 
-    print """[ ${repository} ]:\n${results}"""
+    print "${repository} version tags: \n ${results.join('\n ')}"
 }
