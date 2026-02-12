@@ -30,10 +30,12 @@ def list_version_tags(repository) {
         script: "curl https://hub.docker.com/v2/repositories/${repository}/tags"
     )
 
-    def tags = readJSON text: tags_json
+    def tags = readJSON(text: tags_json)
 
-    print "[ ${repository} ]"
+    def results = []
     tags.results.each { tag ->
-        print tag.name
+        results.add(tag.name)
     }
+
+    print """[ ${repository} ]:\n${results}"""
 }
