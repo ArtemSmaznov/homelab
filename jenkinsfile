@@ -20,11 +20,21 @@ pipeline {
 
 
 def list_versioned_containers() {
-    sh "pwd"
-    sh "ls -al"
+    list_current_versions()
 
     def repository = "jenkins/jenkins"
     list_version_tags(repository)
+}
+
+def list_current_versions() {
+    def docker_compose = readYaml(file: "docker-compose.yml")
+
+    def versions = []
+    docker_compose.services.each { container ->
+        versions.add(container.image)
+    }
+
+    println "Current version tags: \n ${versions.join('\n ')}"
 }
 
 def list_version_tags(repository) {
@@ -40,5 +50,5 @@ def list_version_tags(repository) {
         results.add(tag.name)
     }
 
-    print "${repository} version tags: \n ${results.join('\n ')}"
+    println "${repository} version tags: \n ${results.join('\n ')}"
 }
