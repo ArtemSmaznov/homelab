@@ -33,7 +33,7 @@ def list_current_versions() {
 
     def versions = []
     for (container in docker_compose.services) { 
-        versions.add(container)
+        versions.add(container.key)
     }
 
     println "Current version tags: \n ${versions.join('\n ')}"
