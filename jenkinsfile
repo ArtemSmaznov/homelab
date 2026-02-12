@@ -20,6 +20,9 @@ pipeline {
 
 
 def list_versioned_containers() {
+    sh "pwd"
+    sh "ls -al"
+
     def repository = "jenkins/jenkins"
     list_version_tags(repository)
 }
