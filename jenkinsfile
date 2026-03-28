@@ -11,20 +11,15 @@ pipeline {
         stage('Main') {
             steps {
                 script {
-                    list_versioned_containers()
+                    // list_versioned_containers()
+                    update_nextcloud("32.0.7")
                 }
             }
         }
     }
 }
 
-
-def list_versioned_containers() {
-    list_current_versions()
-
-    def repository = "jenkins/jenkins"
-    list_version_tags(repository)
-}
+// =============================================================================
 
 def list_current_versions() {
     def docker_compose = readYaml(file: "docker-compose.yml")
@@ -53,4 +48,22 @@ def list_version_tags(repository) {
     }
 
     println "${repository} version tags: \n ${results.join('\n ')}"
+}
+
+def list_versioned_containers() {
+    list_current_versions()
+
+    def repository = "jenkins/jenkins"
+    list_version_tags(repository)
+}
+
+def update_nextcloud(String version) {
+    sh(
+        label: "Updating Nextcloud to ${version}",
+        script: """#!/usr/bin/bash +x
+            echo sed -i 's/^\\(NEXTCLOUD_VERSION\\)=.*\$/\\1=${version}/' .env
+            echo docker-compose build --pull nextcloud-app
+            echo docker-compose up -d
+        """
+    )
 }
