@@ -51,6 +51,80 @@ secrets:
 
 services:
 
+  digikam-db:
+    <<: *service_default
+    image: mariadb
+    container_name: digikam-db
+    ports:
+      - ${DIGIKAM_PORT}:3306
+    command: --max_allowed_packet=128M --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    volumes:
+      - ${VOLUMES_DIR}/digikam/db:/var/lib/mysql
+    environment:
+      # app
+      MARIADB_DATABASE: ${DIGIKAM_DB_NAME}
+      MARIADB_USER: ${DIGIKAM_DB_USER}
+      MARIADB_PASSWORD_FILE: /run/secrets/digikam_db_password
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/digikam_db_root_password
+    secrets:
+      - digikam_db_password
+      - digikam_db_root_password
+
+  immich-db:
+    <<: *service_default
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
+    container_name: immich-db
+    hostname: immich-db
+    volumes:
+      - ${VOLUMES_DIR}/immich/db:/var/lib/postgresql/data
+    environment:
+      # app
+      POSTGRES_DB: ${IMMICH_DB_NAME}
+      POSTGRES_USER: ${IMMICH_DB_USER}
+      POSTGRES_PASSWORD: /run/secrets/immich_db_password
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+      # Uncomment the DB_STORAGE_TYPE: 'HDD' var if your database isn't stored on SSDs
+      DB_STORAGE_TYPE: 'HDD'
+    secrets:
+      - immich_db_password
+    networks:
+      - immich
+
+  influxdb:
+    <<: *service_default
+    image: influxdb:${INFLUXDB_VERSION}
+    container_name: influxdb
+    depends_on:
+      - hass
+    ports:
+      - ${INFLUXDB_LOCAL_PORT}:8086
+    volumes:
+      - ${VOLUMES_DIR}/grafana/influxdb:/var/lib/influxdb2
+    networks:
+      - monitor
+      - hass
+
+  nextcloud-db:
+    <<: *service_default
+    image: mariadb
+    container_name: nextcloud-db
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    volumes:
+      - ${VOLUMES_DIR}/nextcloud/db:/var/lib/mysql
+    environment:
+      # app
+      MARIADB_AUTO_UPGRADE: 1
+      MARIADB_DISABLE_UPGRADE_BACKUP: 1
+      MYSQL_DATABASE: ${NEXTCLOUD_DB_NAME}
+      MYSQL_USER: ${NEXTCLOUD_DB_USER}
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+    secrets:
+      - db_password
+      - db_root_password
+    networks:
+      - nextcloud
+
   db-pricebuddy:
     <<: *service_default
     image: mariadb:lts
@@ -75,6 +149,41 @@ services:
     secrets:
       - pricebuddy_db_password
       - pricebuddy_db_root_password
+
+  webtrees-db:
+    <<: *service_default
+    image: mariadb
+    container_name: webtrees-db
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    volumes:
+      - ${VOLUMES_DIR}/webtrees/db:/var/lib/mysql
+    environment:
+      # app
+      MARIADB_AUTO_UPGRADE: 1
+      MARIADB_DISABLE_UPGRADE_BACKUP: 1
+      MARIADB_DATABASE: ${WEBTREES_DB_NAME}
+      MARIADB_USER: ${WEBTREES_DB_USER}
+      MARIADB_PASSWORD_FILE: /run/secrets/webtrees_db_password
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/webtrees_db_root_password
+    secrets:
+      - webtrees_db_password
+      - webtrees_db_root_password
+    networks:
+      - webtrees
+
+  immich-redis:
+    <<: *service_default
+    image: redis:alpine
+    container_name: immich-redis
+    networks:
+      - immich
+
+  nextcloud-redis:
+    <<: *service_default
+    image: redis:alpine
+    container_name: nextcloud-redis
+    networks:
+      - nextcloud
 
   proxy:
     build: ./proxy
@@ -365,20 +474,6 @@ services:
       - hass
       - monitor
 
-  influxdb:
-    <<: *service_default
-    image: influxdb:${INFLUXDB_VERSION}
-    container_name: influxdb
-    depends_on:
-      - hass
-    ports:
-      - ${INFLUXDB_LOCAL_PORT}:8086
-    volumes:
-      - ${VOLUMES_DIR}/grafana/influxdb:/var/lib/influxdb2
-    networks:
-      - monitor
-      - hass
-
   zwave-js-ui:
     <<: *service_default
     image: zwavejs/zwave-js-ui:${ZWAVE_JS_VERSION}
@@ -521,34 +616,6 @@ services:
     networks:
       - nextcloud
 
-  nextcloud-db:
-    <<: *service_default
-    image: mariadb
-    container_name: nextcloud-db
-    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
-    volumes:
-      - ${VOLUMES_DIR}/nextcloud/db:/var/lib/mysql
-    environment:
-      # app
-      MARIADB_AUTO_UPGRADE: 1
-      MARIADB_DISABLE_UPGRADE_BACKUP: 1
-      MYSQL_DATABASE: ${NEXTCLOUD_DB_NAME}
-      MYSQL_USER: ${NEXTCLOUD_DB_USER}
-      MYSQL_PASSWORD_FILE: /run/secrets/db_password
-      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
-    secrets:
-      - db_password
-      - db_root_password
-    networks:
-      - nextcloud
-
-  nextcloud-redis:
-    <<: *service_default
-    image: redis:alpine
-    container_name: nextcloud-redis
-    networks:
-      - nextcloud
-
   calibre-web-books:
     <<: *service_default
     image: lscr.io/linuxserver/calibre-web:${CALIBRE_VERSION}
@@ -663,27 +730,6 @@ services:
       - proxy-tier
       - webtrees
 
-  webtrees-db:
-    <<: *service_default
-    image: mariadb
-    container_name: webtrees-db
-    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
-    volumes:
-      - ${VOLUMES_DIR}/webtrees/db:/var/lib/mysql
-    environment:
-      # app
-      MARIADB_AUTO_UPGRADE: 1
-      MARIADB_DISABLE_UPGRADE_BACKUP: 1
-      MARIADB_DATABASE: ${WEBTREES_DB_NAME}
-      MARIADB_USER: ${WEBTREES_DB_USER}
-      MARIADB_PASSWORD_FILE: /run/secrets/webtrees_db_password
-      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/webtrees_db_root_password
-    secrets:
-      - webtrees_db_password
-      - webtrees_db_root_password
-    networks:
-      - webtrees
-
   navidrome:
     <<: *service_default
     image: deluan/navidrome:${NAVIDROME_VERSION}
@@ -763,52 +809,6 @@ services:
       - proxy-tier
       - immich
       - monitor
-
-  immich-db:
-    <<: *service_default
-    image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
-    container_name: immich-db
-    hostname: immich-db
-    volumes:
-      - ${VOLUMES_DIR}/immich/db:/var/lib/postgresql/data
-    environment:
-      # app
-      POSTGRES_DB: ${IMMICH_DB_NAME}
-      POSTGRES_USER: ${IMMICH_DB_USER}
-      POSTGRES_PASSWORD: /run/secrets/immich_db_password
-      POSTGRES_INITDB_ARGS: '--data-checksums'
-      # Uncomment the DB_STORAGE_TYPE: 'HDD' var if your database isn't stored on SSDs
-      DB_STORAGE_TYPE: 'HDD'
-    secrets:
-      - immich_db_password
-    networks:
-      - immich
-
-  immich-redis:
-    <<: *service_default
-    image: redis:alpine
-    container_name: immich-redis
-    networks:
-      - immich
-
-  digikam-db:
-    <<: *service_default
-    image: mariadb
-    container_name: digikam-db
-    ports:
-      - ${DIGIKAM_PORT}:3306
-    command: --max_allowed_packet=128M --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
-    volumes:
-      - ${VOLUMES_DIR}/digikam/db:/var/lib/mysql
-    environment:
-      # app
-      MARIADB_DATABASE: ${DIGIKAM_DB_NAME}
-      MARIADB_USER: ${DIGIKAM_DB_USER}
-      MARIADB_PASSWORD_FILE: /run/secrets/digikam_db_password
-      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/digikam_db_root_password
-    secrets:
-      - digikam_db_password
-      - digikam_db_root_password
 
   plex:
     <<: *service_default
