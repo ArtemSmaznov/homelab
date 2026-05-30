@@ -21,8 +21,8 @@
 - [[#--------------][--------------]]
 - [[#databases][Databases]]
   - [[#digikam][DigiKam]]
+  - [[#home-assistant][Home Assistant]]
   - [[#immich][Immich]]
-  - [[#influxdb][InfluxDB]]
   - [[#nextcloud][Nextcloud]]
   - [[#pricebuddy][PriceBuddy]]
   - [[#webtrees][WebTrees]]
@@ -44,7 +44,7 @@
   - [[#apc-ups][APC UPS]]
   - [[#pricebuddy-1][PriceBuddy]]
 - [[#automation][Automation]]
-  - [[#home-assistant][Home Assistant]]
+  - [[#home-assistant-1][Home Assistant]]
 - [[#documents][Documents]]
   - [[#nextcloud-2][Nextcloud]]
   - [[#books][Books]]
@@ -196,6 +196,23 @@ services:
       - digikam_db_root_password
 #+end_src
 
+** Home Assistant
+#+begin_src yaml
+  db_hass:
+    container_name: db_hass
+    depends_on:
+      - hass
+    <<: *service_default
+    image: influxdb:${INFLUXDB_VERSION}
+    ports:
+      - ${INFLUXDB_LOCAL_PORT}:8086
+    volumes:
+      - ${INFLUXDB_DIR}/hass:/var/lib/influxdb2
+    networks:
+      - monitor
+      - hass
+#+end_src
+
 ** Immich
 #+begin_src yaml
   db_immich:
@@ -216,23 +233,6 @@ services:
       - immich_db_password
     networks:
       - immich
-#+end_src
-
-** InfluxDB
-#+begin_src yaml
-  influxdb:
-    container_name: influxdb
-    depends_on:
-      - hass
-    <<: *service_default
-    image: influxdb:${INFLUXDB_VERSION}
-    ports:
-      - ${INFLUXDB_LOCAL_PORT}:8086
-    volumes:
-      - ${VOLUMES_DIR}/grafana/influxdb:/var/lib/influxdb2
-    networks:
-      - monitor
-      - hass
 #+end_src
 
 ** Nextcloud

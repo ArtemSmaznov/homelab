@@ -83,6 +83,20 @@ services:
       - digikam_db_password
       - digikam_db_root_password
 
+  db_hass:
+    container_name: db_hass
+    depends_on:
+      - hass
+    <<: *service_default
+    image: influxdb:${INFLUXDB_VERSION}
+    ports:
+      - ${INFLUXDB_LOCAL_PORT}:8086
+    volumes:
+      - ${INFLUXDB_DIR}/hass:/var/lib/influxdb2
+    networks:
+      - monitor
+      - hass
+
   db_immich:
     container_name: db_immich
     <<: *service_default
@@ -101,20 +115,6 @@ services:
       - immich_db_password
     networks:
       - immich
-
-  influxdb:
-    container_name: influxdb
-    depends_on:
-      - hass
-    <<: *service_default
-    image: influxdb:${INFLUXDB_VERSION}
-    ports:
-      - ${INFLUXDB_LOCAL_PORT}:8086
-    volumes:
-      - ${VOLUMES_DIR}/grafana/influxdb:/var/lib/influxdb2
-    networks:
-      - monitor
-      - hass
 
   db_nextcloud:
     container_name: db_nextcloud
