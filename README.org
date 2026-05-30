@@ -13,6 +13,8 @@
 * Table of Contents :toc:
 - [[#usage][Usage]]
 - [[#templates][Templates]]
+  - [[#default][Default]]
+  - [[#redis][Redis]]
 - [[#networks][Networks]]
 - [[#secrets][Secrets]]
 - [[#--------------][--------------]]
@@ -23,7 +25,7 @@
   - [[#nextcloud][Nextcloud]]
   - [[#pricebuddy][PriceBuddy]]
   - [[#webtrees][WebTrees]]
-- [[#redis][Redis]]
+- [[#redis-1][Redis]]
   - [[#immich-1][Immich]]
   - [[#nextcloud-1][Nextcloud]]
 - [[#networking][Networking]]
@@ -86,10 +88,18 @@ docker-compose build --pull
 #+end_example
 
 * Templates
+** Default
 #+begin_src yaml
 x-default: &service_default
   tty: true # enable colorized logs
   restart: unless-stopped
+#+end_src
+
+** Redis
+#+begin_src yaml
+x_redis: &redis
+  <<: *service_default
+  image: redis:alpine
 #+end_src
 
 * Networks
@@ -292,20 +302,18 @@ services:
 * Redis :redis:
 ** Immich
 #+begin_src yaml
-  immich-redis:
-    <<: *service_default
-    image: redis:alpine
-    container_name: immich-redis
+  redis_immich:
+    <<: *redis
+    container_name: redis_immich
     networks:
       - immich
 #+end_src
 
 ** Nextcloud
 #+begin_src yaml
-  nextcloud-redis:
-    <<: *service_default
-    image: redis:alpine
-    container_name: nextcloud-redis
+  redis_nextcloud:
+    <<: *redis
+    container_name: redis_nextcloud
     networks:
       - nextcloud
 #+end_src
@@ -914,7 +922,7 @@ App
     restart: unless-stopped
     depends_on:
       - nextcloud-db
-      - nextcloud-redis
+      - redis_nextcloud
     volumes:
       - ${VOLUMES_DIR}/nextcloud/app:/var/www/html
       # - ${VOLUMES_DIR}/nextcloud/opcache-recommended.ini:/usr/local/etc/php/conf.d/opcache-recommended.ini
@@ -930,7 +938,7 @@ App
       PUID: ${UID}
       PGID: ${UID}
       MYSQL_HOST: nextcloud-db
-      REDIS_HOST: nextcloud-redis
+      REDIS_HOST: redis_nextcloud
       MYSQL_DATABASE: ${NEXTCLOUD_DB_NAME}
       MYSQL_USER: ${NEXTCLOUD_DB_USER}
       MYSQL_PASSWORD_FILE: /run/secrets/db_password
@@ -976,7 +984,7 @@ Cron
     container_name: nextcloud-cron
     depends_on:
       - nextcloud-db
-      - nextcloud-redis
+      - redis_nextcloud
     volumes:
       - ${VOLUMES_DIR}/nextcloud/app:/var/www/html
       - ${VOLUMES_DIR}/nextcloud/cron:/var/spool/cron/crontabs
@@ -1229,7 +1237,7 @@ App
     hostname: immich
     depends_on:
       - immich-db
-      - immich-redis
+      - redis_immich
     ports:
       - ${IMMICH_LOCAL_PORT}:2283
     volumes:
@@ -1248,7 +1256,7 @@ App
       DB_USERNAME: ${IMMICH_DB_USER}
       DB_PASSWORD: /run/secrets/immich_db_password
       DB_HOSTNAME: immich-db
-      REDIS_HOSTNAME: immich-redis
+      REDIS_HOSTNAME: redis_immich
       TZ: ${TIME_ZONE}
     secrets:
       - immich_db_password

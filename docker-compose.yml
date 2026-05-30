@@ -2,6 +2,10 @@ x-default: &service_default
   tty: true # enable colorized logs
   restart: unless-stopped
 
+x_redis: &redis
+  <<: *service_default
+  image: redis:alpine
+
 networks:
   ai:
   calibre:
@@ -171,17 +175,15 @@ services:
     networks:
       - webtrees
 
-  immich-redis:
-    <<: *service_default
-    image: redis:alpine
-    container_name: immich-redis
+  redis_immich:
+    <<: *redis
+    container_name: redis_immich
     networks:
       - immich
 
-  nextcloud-redis:
-    <<: *service_default
-    image: redis:alpine
-    container_name: nextcloud-redis
+  redis_nextcloud:
+    <<: *redis
+    container_name: redis_nextcloud
     networks:
       - nextcloud
 
@@ -553,7 +555,7 @@ services:
     restart: unless-stopped
     depends_on:
       - nextcloud-db
-      - nextcloud-redis
+      - redis_nextcloud
     volumes:
       - ${VOLUMES_DIR}/nextcloud/app:/var/www/html
       # - ${VOLUMES_DIR}/nextcloud/opcache-recommended.ini:/usr/local/etc/php/conf.d/opcache-recommended.ini
@@ -569,7 +571,7 @@ services:
       PUID: ${UID}
       PGID: ${UID}
       MYSQL_HOST: nextcloud-db
-      REDIS_HOST: nextcloud-redis
+      REDIS_HOST: redis_nextcloud
       MYSQL_DATABASE: ${NEXTCLOUD_DB_NAME}
       MYSQL_USER: ${NEXTCLOUD_DB_USER}
       MYSQL_PASSWORD_FILE: /run/secrets/db_password
@@ -609,7 +611,7 @@ services:
     container_name: nextcloud-cron
     depends_on:
       - nextcloud-db
-      - nextcloud-redis
+      - redis_nextcloud
     volumes:
       - ${VOLUMES_DIR}/nextcloud/app:/var/www/html
       - ${VOLUMES_DIR}/nextcloud/cron:/var/spool/cron/crontabs
@@ -782,7 +784,7 @@ services:
     hostname: immich
     depends_on:
       - immich-db
-      - immich-redis
+      - redis_immich
     ports:
       - ${IMMICH_LOCAL_PORT}:2283
     volumes:
@@ -801,7 +803,7 @@ services:
       DB_USERNAME: ${IMMICH_DB_USER}
       DB_PASSWORD: /run/secrets/immich_db_password
       DB_HOSTNAME: immich-db
-      REDIS_HOSTNAME: immich-redis
+      REDIS_HOSTNAME: redis_immich
       TZ: ${TIME_ZONE}
     secrets:
       - immich_db_password
