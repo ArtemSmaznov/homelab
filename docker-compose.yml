@@ -1,3 +1,7 @@
+x-default: &service_default
+  tty: true # enable colorized logs
+  restart: unless-stopped
+
 networks:
   ai:
   calibre:
@@ -44,10 +48,6 @@ secrets:
     file: secrets/pricebuddy/db_password
   pricebuddy_db_root_password:
     file: secrets/pricebuddy/db_root_password
-
-x-default: &service_default
-  tty: true # enable colorized logs
-  restart: unless-stopped
 
 services:
 

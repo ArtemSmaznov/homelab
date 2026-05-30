@@ -12,11 +12,10 @@
 
 * Table of Contents :toc:
 - [[#usage][Usage]]
-- [[#docker-compose][Docker-compose]]
-  - [[#networks][Networks]]
-  - [[#secrets][Secrets]]
-  - [[#templates][Templates]]
-  - [[#last][Last]]
+- [[#templates][Templates]]
+- [[#networks][Networks]]
+- [[#secrets][Secrets]]
+- [[#--------------][--------------]]
 - [[#databases][Databases]]
   - [[#pricebuddy][PriceBuddy]]
 - [[#networking][Networking]]
@@ -79,8 +78,14 @@ Update images
 docker-compose build --pull
 #+end_example
 
-* Docker-compose
-** Networks
+* Templates
+#+begin_src yaml
+x-default: &service_default
+  tty: true # enable colorized logs
+  restart: unless-stopped
+#+end_src
+
+* Networks
 #+begin_src yaml
 networks:
   ai:
@@ -102,7 +107,7 @@ networks:
   webtrees:
 #+end_src
 
-** Secrets
+* Secrets
 #+begin_src yaml
 secrets:
   db_password:
@@ -133,14 +138,7 @@ secrets:
     file: secrets/pricebuddy/db_root_password
 #+end_src
 
-** Templates
-#+begin_src yaml
-x-default: &service_default
-  tty: true # enable colorized logs
-  restart: unless-stopped
-#+end_src
-
-** Last
+* --------------
 #+begin_src yaml
 services:
 #+end_src
