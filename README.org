@@ -617,19 +617,21 @@ Application
     environment:
       # application
       SCRAPER_BASE_URL: http://scraper-pricebuddy:3000
-      # APP_URL: ""
-      # ASSET_URL: ""
 
       # database
       DB_HOST: db-pricebuddy
       DB_DATABASE: ${PRICEBUDDY_DB_NAME}
-      MARIADB_USER: ${PRICEBUDDY_DB_USER}
+      DB_USERNAME: ${PRICEBUDDY_DB_USER}
+      DB_PASSWORD_FILE: /run/secrets/pricebuddy_db_password
 
       # proxy
       # APP_URL: ""
       # ASSET_URL: ""
     networks:
       - pricebuddy
+    secrets:
+      - pricebuddy_db_password
+      - pricebuddy_db_root_password
 #+end_src
 
 Scraper
