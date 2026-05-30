@@ -6,6 +6,16 @@ x-redis: &redis
   <<: *service_default
   image: redis:alpine
 
+x-mariadb: &mariadb
+  <<: *service_default
+  image: mariadb:lts
+  healthcheck:
+    test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+    start_period: 10s
+    interval: 10s
+    timeout: 5s
+    retries: 3
+
 networks:
   ai:
   calibre:
@@ -56,16 +66,15 @@ secrets:
 services:
 
   digikam-db:
-    <<: *service_default
-    image: mariadb
     container_name: digikam-db
+    <<: *mariadb
+    command: --max_allowed_packet=128M --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     ports:
       - ${DIGIKAM_PORT}:3306
-    command: --max_allowed_packet=128M --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     volumes:
       - ${VOLUMES_DIR}/digikam/db:/var/lib/mysql
     environment:
-      # app
+      # application
       MARIADB_DATABASE: ${DIGIKAM_DB_NAME}
       MARIADB_USER: ${DIGIKAM_DB_USER}
       MARIADB_PASSWORD_FILE: /run/secrets/digikam_db_password
@@ -75,14 +84,14 @@ services:
       - digikam_db_root_password
 
   immich-db:
-    <<: *service_default
-    image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
     container_name: immich-db
     hostname: immich-db
+    <<: *service_default
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
     volumes:
       - ${VOLUMES_DIR}/immich/db:/var/lib/postgresql/data
     environment:
-      # app
+      # application
       POSTGRES_DB: ${IMMICH_DB_NAME}
       POSTGRES_USER: ${IMMICH_DB_USER}
       POSTGRES_PASSWORD: /run/secrets/immich_db_password
@@ -95,11 +104,11 @@ services:
       - immich
 
   influxdb:
-    <<: *service_default
-    image: influxdb:${INFLUXDB_VERSION}
     container_name: influxdb
     depends_on:
       - hass
+    <<: *service_default
+    image: influxdb:${INFLUXDB_VERSION}
     ports:
       - ${INFLUXDB_LOCAL_PORT}:8086
     volumes:
@@ -109,14 +118,13 @@ services:
       - hass
 
   nextcloud-db:
-    <<: *service_default
-    image: mariadb
     container_name: nextcloud-db
+    <<: *mariadb
     command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     volumes:
       - ${VOLUMES_DIR}/nextcloud/db:/var/lib/mysql
     environment:
-      # app
+      # application
       MARIADB_AUTO_UPGRADE: 1
       MARIADB_DISABLE_UPGRADE_BACKUP: 1
       MYSQL_DATABASE: ${NEXTCLOUD_DB_NAME}
@@ -130,16 +138,8 @@ services:
       - nextcloud
 
   db-pricebuddy:
-    <<: *service_default
-    image: mariadb:lts
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      start_period: 10s
-      interval: 10s
-      timeout: 5s
-      retries: 3
     container_name: db-pricebuddy
-    hostname: db-pricebuddy
+    <<: *mariadb
     volumes:
       - ${MYSQL_DIR}/pricebuddy:/var/lib/mysql
     environment:
@@ -148,21 +148,20 @@ services:
       MARIADB_USER: ${PRICEBUDDY_DB_USER}
       MARIADB_PASSWORD_FILE: /run/secrets/pricebuddy_db_password
       MARIADB_ROOT_PASSWORD_FILE: /run/secrets/pricebuddy_db_root_password
-    networks:
-      - pricebuddy
     secrets:
       - pricebuddy_db_password
       - pricebuddy_db_root_password
+    networks:
+      - pricebuddy
 
   webtrees-db:
-    <<: *service_default
-    image: mariadb
     container_name: webtrees-db
+    <<: *mariadb
     command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     volumes:
       - ${VOLUMES_DIR}/webtrees/db:/var/lib/mysql
     environment:
-      # app
+      # application
       MARIADB_AUTO_UPGRADE: 1
       MARIADB_DISABLE_UPGRADE_BACKUP: 1
       MARIADB_DATABASE: ${WEBTREES_DB_NAME}
