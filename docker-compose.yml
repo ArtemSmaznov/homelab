@@ -65,8 +65,8 @@ secrets:
 
 services:
 
-  digikam-db:
-    container_name: digikam-db
+  db_digikam:
+    container_name: db_digikam
     <<: *mariadb
     command: --max_allowed_packet=128M --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     ports:
@@ -83,9 +83,9 @@ services:
       - digikam_db_password
       - digikam_db_root_password
 
-  immich-db:
-    container_name: immich-db
-    hostname: immich-db
+  db_immich:
+    container_name: db_immich
+    hostname: db_immich
     <<: *service_default
     image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
     volumes:
@@ -117,8 +117,8 @@ services:
       - monitor
       - hass
 
-  nextcloud-db:
-    container_name: nextcloud-db
+  db_nextcloud:
+    container_name: db_nextcloud
     <<: *mariadb
     command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     volumes:
@@ -137,8 +137,8 @@ services:
     networks:
       - nextcloud
 
-  db-pricebuddy:
-    container_name: db-pricebuddy
+  db_pricebuddy:
+    container_name: db_pricebuddy
     <<: *mariadb
     volumes:
       - ${MYSQL_DIR}/pricebuddy:/var/lib/mysql
@@ -154,8 +154,8 @@ services:
     networks:
       - pricebuddy
 
-  webtrees-db:
-    container_name: webtrees-db
+  db_webtrees:
+    container_name: db_webtrees
     <<: *mariadb
     command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     volumes:
@@ -418,7 +418,7 @@ services:
     container_name: pricebuddy
     hostname: pricebuddy
     depends_on:
-      db-pricebuddy:
+      db_pricebuddy:
         condition: service_healthy
     ports:
       - ${PRICEBUDDY_LOCAL_PORT}:80
@@ -429,7 +429,7 @@ services:
       SCRAPER_BASE_URL: http://scraper-pricebuddy:3000
 
       # database
-      DB_HOST: db-pricebuddy
+      DB_HOST: db_pricebuddy
       DB_DATABASE: ${PRICEBUDDY_DB_NAME}
       DB_USERNAME: ${PRICEBUDDY_DB_USER}
       DB_PASSWORD_FILE: /run/secrets/pricebuddy_db_password
@@ -553,7 +553,7 @@ services:
     tty: true # enable colorized logs
     restart: unless-stopped
     depends_on:
-      - nextcloud-db
+      - db_nextcloud
       - redis_nextcloud
     volumes:
       - ${VOLUMES_DIR}/nextcloud/app:/var/www/html
@@ -569,7 +569,7 @@ services:
       # app
       PUID: ${UID}
       PGID: ${UID}
-      MYSQL_HOST: nextcloud-db
+      MYSQL_HOST: db_nextcloud
       REDIS_HOST: redis_nextcloud
       MYSQL_DATABASE: ${NEXTCLOUD_DB_NAME}
       MYSQL_USER: ${NEXTCLOUD_DB_USER}
@@ -609,7 +609,7 @@ services:
     entrypoint: /cron.sh
     container_name: nextcloud-cron
     depends_on:
-      - nextcloud-db
+      - db_nextcloud
       - redis_nextcloud
     volumes:
       - ${VOLUMES_DIR}/nextcloud/app:/var/www/html
@@ -694,7 +694,7 @@ services:
     image: nathanvaughn/webtrees:${WEBTREES_VERSION}
     container_name: webtrees
     depends_on:
-      - webtrees-db
+      - db_webtrees
     volumes:
       - ${VOLUMES_DIR}/webtrees/data:/var/www/webtrees/data
       - ${VOLUMES_DIR}/webtrees/themes:/var/www/webtrees/modules_v4
@@ -714,7 +714,7 @@ services:
       SERVER_URL: "https://${WEBTREES_HOST}"
       BASE_URL: "https://${WEBTREES_HOST}"
       DB_TYPE: mysql
-      DB_HOST: webtrees-db
+      DB_HOST: db_webtrees
       DB_PORT: 3306
       DB_NAME: ${WEBTREES_DB_NAME}
       DB_USER: ${WEBTREES_DB_USER}
@@ -782,7 +782,7 @@ services:
     container_name: immich
     hostname: immich
     depends_on:
-      - immich-db
+      - db_immich
       - redis_immich
     ports:
       - ${IMMICH_LOCAL_PORT}:2283
@@ -801,7 +801,7 @@ services:
       DB_DATABASE_NAME: ${IMMICH_DB_NAME}
       DB_USERNAME: ${IMMICH_DB_USER}
       DB_PASSWORD: /run/secrets/immich_db_password
-      DB_HOSTNAME: immich-db
+      DB_HOSTNAME: db_immich
       REDIS_HOSTNAME: redis_immich
       TZ: ${TIME_ZONE}
     secrets:
