@@ -200,11 +200,10 @@ services:
 #+begin_src yaml
   db_immich:
     container_name: db_immich
-    hostname: db_immich
     <<: *service_default
     image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
     volumes:
-      - ${VOLUMES_DIR}/immich/db:/var/lib/postgresql/data
+      - ${POSTGRESQL_DIR}/immich:/var/lib/postgresql/data
     environment:
       # application
       POSTGRES_DB: ${IMMICH_DB_NAME}
