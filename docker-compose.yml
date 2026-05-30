@@ -9,6 +9,7 @@ networks:
   monitor:
   music:
   nextcloud:
+  pricebuddy:
   proxy-tier:
     ipam:
       config:
@@ -39,12 +40,41 @@ secrets:
     file: secrets/digikam/db_password
   digikam_db_root_password:
     file: secrets/digikam/db_root_password
+  pricebuddy_db_password:
+    file: secrets/pricebuddy/db_password
+  pricebuddy_db_root_password:
+    file: secrets/pricebuddy/db_root_password
 
 x-default: &service_default
   tty: true # enable colorized logs
   restart: unless-stopped
 
 services:
+
+  db-pricebuddy:
+    <<: *service_default
+    image: mariadb:lts
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    container_name: db-pricebuddy
+    hostname: db-pricebuddy
+    volumes:
+      - ${MYSQL_DIR}/pricebuddy:/var/lib/mysql
+    environment:
+      # application
+      MARIADB_DATABASE: ${PRICEBUDDY_DB_NAME}
+      MARIADB_USER: ${PRICEBUDDY_DB_USER}
+      MARIADB_PASSWORD_FILE: /run/secrets/pricebuddy_db_password
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/pricebuddy_db_root_password
+    networks:
+      - pricebuddy
+    secrets:
+      - pricebuddy_db_password
+      - pricebuddy_db_root_password
 
   proxy:
     build: ./proxy
@@ -271,6 +301,45 @@ services:
     networks:
       - hass
       - monitor
+
+  pricebuddy:
+    <<: *service_default
+    image: jez500/pricebuddy:${PRICEBUDDY_VERSION}
+    container_name: pricebuddy
+    hostname: pricebuddy
+    depends_on:
+      db-pricebuddy:
+        condition: service_healthy
+    ports:
+      - ${PRICEBUDDY_LOCAL_PORT}:80
+    volumes:
+      - ${VOLUMES_DIR}/pricebuddy:/app/storage
+    environment:
+      # application
+      SCRAPER_BASE_URL: http://scraper-pricebuddy:3000
+      # APP_URL: ""
+      # ASSET_URL: ""
+
+      # database
+      DB_HOST: db-pricebuddy
+      DB_DATABASE: ${PRICEBUDDY_DB_NAME}
+      MARIADB_USER: ${PRICEBUDDY_DB_USER}
+
+      # proxy
+      # APP_URL: ""
+      # ASSET_URL: ""
+    networks:
+      - pricebuddy
+
+  scraper-pricebuddy:
+    <<: *service_default
+    image: jez500/seleniumbase-scrapper:${SCRAPER_PRICEBUDDY_VERSION}
+    container_name: scraper-pricebuddy
+    hostname: scraper-pricebuddy
+    ports:
+      - ${SCRAPER_PRICEBUDDY_LOCAL_PORT}:3000
+    networks:
+      - pricebuddy
 
   hass:
     <<: *service_default
