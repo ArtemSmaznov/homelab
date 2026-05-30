@@ -82,9 +82,9 @@ services:
       POSTGRES_DB: ${IMMICH_DB_NAME}
       POSTGRES_USER: ${IMMICH_DB_USER}
       POSTGRES_PASSWORD: /run/secrets/immich_db_password
-      POSTGRES_INITDB_ARGS: '--data-checksums'
+      POSTGRES_INITDB_ARGS: "--data-checksums"
       # Uncomment the DB_STORAGE_TYPE: 'HDD' var if your database isn't stored on SSDs
-      DB_STORAGE_TYPE: 'HDD'
+      DB_STORAGE_TYPE: "HDD"
     secrets:
       - immich_db_password
     networks:
@@ -200,7 +200,7 @@ services:
       - ${VOLUMES_DIR}/proxy/html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
     labels:
-      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: 'true'
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
     networks:
       - proxy-tier
 
@@ -304,7 +304,7 @@ services:
     image: grafana/grafana-oss:${GRAFANA_VERSION:-preview}
     container_name: grafana
     hostname: grafana
-    user: '${UID}'
+    user: "${UID}"
     ports:
       - ${GRAFANA_LOCAL_PORT}:3000
     volumes:
@@ -364,7 +364,7 @@ services:
     container_name: node_exporter
     hostname: node_exporter
     command:
-      - '--path.rootfs=/host'
+      - "--path.rootfs=/host"
     pid: host
     ports:
       - ${PROMETHEUS_NODE_EXPORTER_LOCAL_PORT}:9100
