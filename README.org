@@ -184,7 +184,7 @@ services:
     ports:
       - ${DIGIKAM_PORT}:3306
     volumes:
-      - ${VOLUMES_DIR}/digikam/db:/var/lib/mysql
+      - ${MYSQL_DIR}/digikam:/var/lib/mysql
     environment:
       # application
       MARIADB_DATABASE: ${DIGIKAM_DB_NAME}
