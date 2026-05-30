@@ -97,7 +97,7 @@ x-default: &service_default
 
 ** Redis
 #+begin_src yaml
-x_redis: &redis
+x-redis: &redis
   <<: *service_default
   image: redis:alpine
 #+end_src
