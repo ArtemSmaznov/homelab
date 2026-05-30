@@ -158,7 +158,7 @@ services:
     <<: *mariadb
     command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     volumes:
-      - ${VOLUMES_DIR}/webtrees/db:/var/lib/mysql
+      - ${MYSQL_DIR}/webtrees:/var/lib/mysql
     environment:
       # application
       MARIADB_AUTO_UPGRADE: 1
