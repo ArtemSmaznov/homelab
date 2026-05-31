@@ -435,10 +435,14 @@ services:
       DB_PASSWORD: ${PRICEBUDDY_DB_PASSWORD}
 
       # proxy
-      # APP_URL: ""
-      # ASSET_URL: ""
+      APP_URL: ${PRICEBUDDY_HOST}
+      ASSET_URL: ${PRICEBUDDY_HOST}
+      VIRTUAL_HOST: ${PRICEBUDDY_HOST}
+      LETSENCRYPT_HOST: ${PRICEBUDDY_HOST}
+      LETSENCRYPT_EMAIL: ${MY_EMAIL}
     networks:
       - pricebuddy
+      - proxy-tier
     secrets:
       - pricebuddy_db_password
       - pricebuddy_db_root_password
