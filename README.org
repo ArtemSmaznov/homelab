@@ -770,7 +770,8 @@ Application
       DB_HOST: db_pricebuddy
       DB_DATABASE: ${PRICEBUDDY_DB_NAME}
       DB_USERNAME: ${PRICEBUDDY_DB_USER}
-      DB_PASSWORD_FILE: /run/secrets/pricebuddy_db_password
+      # DB_PASSWORD_FILE: /run/secrets/pricebuddy_db_password
+      DB_PASSWORD: ${PRICEBUDDY_DB_PASSWORD}
 
       # proxy
       # APP_URL: ""
