@@ -101,6 +101,12 @@ x-default: &service_default
 x-redis: &redis
   <<: *service_default
   image: redis:alpine
+  healthcheck:
+    test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+    start_period: 10s
+    interval: 10s
+    timeout: 3s
+    retries: 5
 #+end_src
 
 ** MariaDB
