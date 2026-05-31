@@ -751,10 +751,9 @@ https://haugene.github.io/docker-transmission-openvpn/
 Application
 #+begin_src yaml
   pricebuddy:
+    container_name: pricebuddy
     <<: *service_default
     image: jez500/pricebuddy:${PRICEBUDDY_VERSION}
-    container_name: pricebuddy
-    hostname: pricebuddy
     depends_on:
       db_pricebuddy:
         condition: service_healthy
@@ -767,7 +766,7 @@ Application
       APP_KEY: ${PRICEBUDDY_KEY}
       APP_URL: https://${PRICEBUDDY_HOST}
       ASSET_URL: https://${PRICEBUDDY_HOST}
-      SCRAPER_BASE_URL: http://scraper-pricebuddy:3000
+      SCRAPER_BASE_URL: http://scraper_pricebuddy:3000
 
       # database
       DB_HOST: db_pricebuddy
@@ -791,11 +790,16 @@ Application
 
 Scraper
 #+begin_src yaml
-  scraper-pricebuddy:
+  scraper_pricebuddy:
+    container_name: scraper_pricebuddy
     <<: *service_default
     image: jez500/seleniumbase-scrapper:${SCRAPER_PRICEBUDDY_VERSION}
-    container_name: scraper-pricebuddy
-    hostname: scraper-pricebuddy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://0.0.0.0:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
     ports:
       - ${SCRAPER_PRICEBUDDY_LOCAL_PORT}:3000
     networks:
