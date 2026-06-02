@@ -1028,6 +1028,14 @@ Cron
       # application
       PUID: ${UID}
       PGID: ${DGID}
+
+      # proxy
+      VIRTUAL_HOST: ${BOOKS_HOST}
+      VIRTUAL_PORT: 5000
+      LETSENCRYPT_HOST: ${BOOKS_HOST}
+      LETSENCRYPT_EMAIL: ${MY_EMAIL}
+    networks:
+      - proxy-tier
 #+end_src
 
 *** Calibre Web - Books
@@ -1043,13 +1051,7 @@ Cron
       - ${VOLUMES_DIR}/calibre/books:/config
       - ${BOOKS_DIR}:/books
     environment:
-      # proxy
-      VIRTUAL_HOST: ${CALIBRE_BOOKS_HOST}
-      VIRTUAL_PORT: 8083
-      LETSENCRYPT_HOST: ${CALIBRE_BOOKS_HOST}
-      LETSENCRYPT_EMAIL: ${MY_EMAIL}
-
-      # app
+      # application
       PUID: ${UID}
       PGID: ${GID}
       TZ: ${TIME_ZONE}
