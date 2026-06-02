@@ -1013,6 +1013,23 @@ Cron
 #+end_src
 
 ** Books :book:
+*** Kavita
+#+begin_src yaml
+  kavita:
+    container_name: kavita
+    <<: *service_default
+    image: lscr.io/linuxserver/kavita:${KAVITA_VERSION}
+    ports:
+      - ${KAVITA_LOCAL_PORT}:5000
+    volumes:
+      - ${VOLUMES_DIR}/kavita/config:/config
+      - ${BOOKS_DIR}:/data/books
+    environment:
+      # application
+      PUID: ${UID}
+      PGID: ${DGID}
+#+end_src
+
 *** Calibre Web - Books
 #+begin_src yaml
   calibre-web-books:
