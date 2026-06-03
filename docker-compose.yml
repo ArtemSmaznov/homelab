@@ -642,7 +642,7 @@ services:
       - ${KAVITA_LOCAL_PORT}:5000
     volumes:
       - ${VOLUMES_DIR}/kavita/config:/config
-      - ${BOOKS_DIR}:/data/books
+      - ${LIBRARY_DIR}:/data
     environment:
       # application
       PUID: ${UID}
