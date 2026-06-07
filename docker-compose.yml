@@ -978,7 +978,7 @@ services:
 
   ollama:
     <<: *service_default
-    image: ollama/ollama
+    image: ollama/ollama:${OLLAMA_VERSION}
     container_name: ollama
     hostname: ollama
     ports:
