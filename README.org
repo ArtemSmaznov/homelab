@@ -269,6 +269,8 @@ services:
   db_pricebuddy:
     container_name: db_pricebuddy
     <<: *mariadb
+    ports:
+      - ${DB_PRICEBUDDY_LOCAL_PORT}:3306
     volumes:
       - ${MYSQL_DIR}/pricebuddy:/var/lib/mysql
     environment:
