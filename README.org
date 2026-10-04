@@ -1354,6 +1354,10 @@ App
     container_name: jellyfin
     hostname: jellyfin
     user: ${UID}:${GID}
+    group_add:
+      - ${RENDER_GROUP_ID}
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
     ports:
       - ${JELLYFIN_LOCAL_PORT}:8096/tcp
     volumes:
