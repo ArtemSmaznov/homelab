@@ -128,6 +128,7 @@ services:
     command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     volumes:
       - ${MYSQL_DIR}/nextcloud:/var/lib/mysql
+      - ${VOLUMES_DIR}/nextcloud/db:/etc/mysql/conf.d
     environment:
       # application
       MARIADB_AUTO_UPGRADE: 1
