@@ -16,13 +16,14 @@
   - [[#default][Default]]
   - [[#redis][Redis]]
   - [[#mariadb][MariaDB]]
+  - [[#postgresdb][PostgresDB]]
 - [[#networks][Networks]]
 - [[#secrets][Secrets]]
 - [[#--------------][--------------]]
 - [[#databases][Databases]]
   - [[#mariadb-1][MariaDB]]
   - [[#influxdb][InfluxDB]]
-  - [[#postgresdb][PostgresDB]]
+  - [[#postgresdb-1][PostgresDB]]
 - [[#redis-1][Redis]]
   - [[#immich][Immich]]
   - [[#nextcloud][Nextcloud]]
@@ -106,13 +107,30 @@ x-redis: &redis
     retries: 5
 #+end_src
 
-** MariaDB
+** MariaDB :maria:
 #+begin_src yaml
 x-mariadb: &mariadb
   <<: *service_default
   image: mariadb:lts
   healthcheck:
     test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+    start_period: 10s
+    interval: 10s
+    timeout: 5s
+    retries: 3
+#+end_src
+
+** PostgresDB :postgres:
+#+begin_src yaml
+x-postgresdb: &postgresdb
+  <<: *service_default
+  image: postgresdb:latest
+  environment:
+    POSTGRES_INITDB_ARGS: "--data-checksums"
+    # Uncomment the DB_STORAGE_TYPE: 'HDD' var if your database isn't stored on SSDs
+    DB_STORAGE_TYPE: "HDD"
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready"]
     start_period: 10s
     interval: 10s
     timeout: 5s
