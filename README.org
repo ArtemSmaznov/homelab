@@ -20,15 +20,12 @@
 - [[#secrets][Secrets]]
 - [[#--------------][--------------]]
 - [[#databases][Databases]]
-  - [[#digikam][DigiKam]]
-  - [[#home-assistant][Home Assistant]]
+  - [[#mariadb-1][MariaDB]]
+  - [[#influxdb][InfluxDB]]
+  - [[#postgresdb][PostgresDB]]
+- [[#redis-1][Redis]]
   - [[#immich][Immich]]
   - [[#nextcloud][Nextcloud]]
-  - [[#pricebuddy][PriceBuddy]]
-  - [[#webtrees][WebTrees]]
-- [[#redis-1][Redis]]
-  - [[#immich-1][Immich]]
-  - [[#nextcloud-1][Nextcloud]]
 - [[#networking][Networking]]
   - [[#pi-hole][Pi-hole]]
   - [[#reverse-proxy][Reverse proxy]]
@@ -42,20 +39,20 @@
   - [[#grafana][Grafana]]
   - [[#prometheus][Prometheus]]
   - [[#apc-ups][APC UPS]]
-  - [[#pricebuddy-1][PriceBuddy]]
+  - [[#pricebuddy][PriceBuddy]]
 - [[#automation][Automation]]
-  - [[#home-assistant-1][Home Assistant]]
+  - [[#home-assistant][Home Assistant]]
 - [[#documents][Documents]]
-  - [[#nextcloud-2][Nextcloud]]
+  - [[#nextcloud-1][Nextcloud]]
   - [[#books][Books]]
-  - [[#webtrees-1][WebTrees]]
+  - [[#webtrees][WebTrees]]
 - [[#music][Music]]
   - [[#hold-mpd][HOLD MPD]]
   - [[#navidrome][Navidrome]]
   - [[#maloja][Maloja]]
   - [[#hold-snapcast][HOLD Snapcast]]
 - [[#photos][Photos]]
-  - [[#immich-2][Immich]]
+  - [[#immich-1][Immich]]
 - [[#video][Video]]
   - [[#plex][Plex]]
   - [[#jellyfin][Jellyfin]]
@@ -181,7 +178,8 @@ services:
 #+end_src
 
 * Databases :db:
-** DigiKam
+** MariaDB :maria:
+*** DigiKam
 #+begin_src yaml
   db_digikam:
     container_name: db_digikam
@@ -202,46 +200,7 @@ services:
       - digikam_db_root_password
 #+end_src
 
-** Home Assistant
-#+begin_src yaml
-  db_hass:
-    container_name: db_hass
-    depends_on:
-      - hass
-    <<: *service_default
-    image: influxdb:${INFLUXDB_VERSION}
-    ports:
-      - ${DB_INFLUXDB_LOCAL_PORT}:8086
-    volumes:
-      - ${INFLUXDB_DIR}/hass:/var/lib/influxdb2
-    networks:
-      - monitor
-      - hass
-#+end_src
-
-** Immich
-#+begin_src yaml
-  db_immich:
-    container_name: db_immich
-    <<: *service_default
-    image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
-    volumes:
-      - ${POSTGRESQL_DIR}/immich:/var/lib/postgresql/data
-    environment:
-      # application
-      POSTGRES_DB: ${IMMICH_DB_NAME}
-      POSTGRES_USER: ${IMMICH_DB_USER}
-      POSTGRES_PASSWORD: /run/secrets/immich_db_password
-      POSTGRES_INITDB_ARGS: "--data-checksums"
-      # Uncomment the DB_STORAGE_TYPE: 'HDD' var if your database isn't stored on SSDs
-      DB_STORAGE_TYPE: "HDD"
-    secrets:
-      - immich_db_password
-    networks:
-      - immich
-#+end_src
-
-** Nextcloud
+*** Nextcloud
 #+begin_src yaml
   db_nextcloud:
     container_name: db_nextcloud
@@ -265,7 +224,7 @@ services:
       - nextcloud
 #+end_src
 
-** PriceBuddy
+*** PriceBuddy
 #+begin_src yaml
   db_pricebuddy:
     container_name: db_pricebuddy
@@ -287,7 +246,7 @@ services:
       - pricebuddy
 #+end_src
 
-** WebTrees
+*** WebTrees
 #+begin_src yaml
   db_webtrees:
     container_name: db_webtrees
@@ -308,6 +267,47 @@ services:
       - webtrees_db_root_password
     networks:
       - webtrees
+#+end_src
+
+** InfluxDB :influx:
+*** Home Assistant
+#+begin_src yaml
+  db_hass:
+    container_name: db_hass
+    depends_on:
+      - hass
+    <<: *service_default
+    image: influxdb:${INFLUXDB_VERSION}
+    ports:
+      - ${DB_INFLUXDB_LOCAL_PORT}:8086
+    volumes:
+      - ${INFLUXDB_DIR}/hass:/var/lib/influxdb2
+    networks:
+      - monitor
+      - hass
+#+end_src
+
+** PostgresDB :postgres:
+*** Immich
+#+begin_src yaml
+  db_immich:
+    container_name: db_immich
+    <<: *service_default
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
+    volumes:
+      - ${POSTGRESQL_DIR}/immich:/var/lib/postgresql/data
+    environment:
+      # application
+      POSTGRES_DB: ${IMMICH_DB_NAME}
+      POSTGRES_USER: ${IMMICH_DB_USER}
+      POSTGRES_PASSWORD: /run/secrets/immich_db_password
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+      # Uncomment the DB_STORAGE_TYPE: 'HDD' var if your database isn't stored on SSDs
+      DB_STORAGE_TYPE: "HDD"
+    secrets:
+      - immich_db_password
+    networks:
+      - immich
 #+end_src
 
 * Redis :redis:
