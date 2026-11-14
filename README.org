@@ -296,6 +296,12 @@ services:
       - hass
     <<: *service_default
     image: influxdb:${INFLUXDB_VERSION}
+    healthcheck:
+      test: ["CMD", "curl", "localhost:8086/api/v2/ping"]
+      start_period: 10s
+      interval: 1m
+      timeout: 10s
+      retries: 5
     ports:
       - ${DB_INFLUXDB_LOCAL_PORT}:8086
     volumes:
